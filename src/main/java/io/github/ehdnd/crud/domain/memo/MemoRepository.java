@@ -1,5 +1,6 @@
 package io.github.ehdnd.crud.domain.memo;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,11 @@ public class MemoRepository {
     Memo findMemo = store.get(id);
     findMemo.setTitle(updateParam.getTitle());
     findMemo.setContent(updateParam.getContent());
-    findMemo.setUpdatedAt(updateParam.getUpdatedAt());
+    
+    findMemo.setUpdatedAt(LocalDateTime.now());
+  }
+
+  public void clear() {
+    store.clear();
   }
 }

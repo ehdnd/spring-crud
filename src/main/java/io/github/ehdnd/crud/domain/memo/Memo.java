@@ -17,9 +17,7 @@ public class Memo {
   private Memo() {
   }
 
-  public Memo(Long id, String title, String content, LocalDateTime createdAt,
-      LocalDateTime updatedAt) {
-    this.id = id;
+  public Memo(String title, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
     this.title = title;
     this.content = content;
     this.createdAt = createdAt;
