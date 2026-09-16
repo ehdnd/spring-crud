@@ -1,10 +1,6 @@
-/ - 메인
-/memos - 메모 전체보기
+GET /memos - 메모 전체보기
 
-/memos/{id} - 해당 메모
+GET /memos/{id} - 해당 메모
+PATCH /memos/{id} - update 수정
 
-/memos/{id}/edit - GET form
-/memos/{id}/edit - POST 수정 → redirect → GET /{id}
-
-/memos/add GET - 메모 추가 화면
-/memos/add POST - 메모 추가 -> redirect -> GET /{id}
+POST /memos - 생성
