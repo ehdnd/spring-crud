@@ -9,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -26,6 +29,31 @@ public class MemoController {
 
     return memoRepository.findAll();
   }
+
+  @GetMapping("/{id}")
+  Memo memo(@PathVariable Long id) {
+    log.debug("memo");
+
+    return memoRepository.findById(id);
+  }
+
+  @GetMapping("/{id}/edit")
+  Memo getEdit(@PathVariable Long id) {
+    log.debug("getEdit");
+    return memoRepository.findById(id);
+  }
+
+  @PostMapping("/{id}/edit")
+  Memo postEdit(@PathVariable Long id, @RequestParam String title, @RequestParam String content) {
+    log.debug("postEdit");
+    log.debug("title: {}, content: {}", title, content);
+
+    Memo findMemo = memoRepository.findById(id);
+    Memo updateParam = new Memo(title, content, findMemo.getCreatedAt(), findMemo.getUpdatedAt());
+
+    return memoRepository.update(id, updateParam);
+  }
+
 
   @PostConstruct
   void init() {

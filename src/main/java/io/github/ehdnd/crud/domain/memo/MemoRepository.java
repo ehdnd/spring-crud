@@ -27,12 +27,13 @@ public class MemoRepository {
     return new ArrayList<>(store.values());
   }
 
-  public void update(Long id, Memo updateParam) {
+  public Memo update(Long id, Memo updateParam) {
     Memo findMemo = store.get(id);
     findMemo.setTitle(updateParam.getTitle());
     findMemo.setContent(updateParam.getContent());
 
     findMemo.setUpdatedAt(LocalDateTime.now());
+    return findMemo;
   }
 
   public void clear() {

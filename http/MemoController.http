@@ -1,2 +1,12 @@
 ###
 GET http://localhost:8080/memos
+
+###
+GET http://localhost:8080/memos/2
+
+###
+POST http://localhost:8080/memos/1/edit
+Content-Type: application/x-www-form-urlencoded
+
+title = updatedA &
+content = updateAAA
