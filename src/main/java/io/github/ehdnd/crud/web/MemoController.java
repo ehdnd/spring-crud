@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,31 +22,27 @@ public class MemoController {
 
   private final MemoRepository memoRepository;
 
-  @GetMapping
+  @GetMapping()
   List<Memo> memos() {
-    log.debug("memos");
-
     return memoRepository.findAll();
+  }
+
+  @PostMapping()
+  Memo add(@ModelAttribute Memo memo) {
+    log.debug("memo={}", memo);
+    return memoRepository.save(memo);
   }
 
   @GetMapping("/{id}")
   Memo memo(@PathVariable Long id) {
-    log.debug("memo");
-
+    log.debug("id={}", id);
     return memoRepository.findById(id);
   }
 
-  @PostMapping("/{id}/edit")
-  Memo postEdit(@PathVariable Long id, @ModelAttribute Memo updateParam) {
-    log.debug("postEdit");
-    log.debug("updateParam: {}", updateParam);
+  @PatchMapping("/{id}")
+  Memo edit(@PathVariable Long id, @ModelAttribute Memo updateParam) {
+    log.debug("updateParam={}", updateParam);
     return memoRepository.update(id, updateParam);
-  }
-
-  @PostMapping("/add")
-  Memo postAdd(@ModelAttribute Memo memo) {
-    log.debug("postAdd");
-    return memoRepository.save(memo);
   }
 
   @PostConstruct

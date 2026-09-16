@@ -5,7 +5,7 @@ GET http://localhost:8080/memos
 GET http://localhost:8080/memos/2
 
 ###
-POST http://localhost:8080/memos/1/edit
+PATCH http://localhost:8080/memos/1
 Content-Type: application/x-www-form-urlencoded
 
 title = updatedA &
@@ -13,7 +13,7 @@ content = updateAAA
 
 
 ###
-POST http://localhost:8080/memos/add
+POST http://localhost:8080/memos
 Content-Type: application/x-www-form-urlencoded
 
 title = newA &
