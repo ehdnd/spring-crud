@@ -14,7 +14,11 @@ public class MemoRepository {
   private static long sequence = 0L;
 
   public Memo save(Memo memo) {
+    LocalDateTime now = LocalDateTime.now();
     memo.setId(++sequence);
+    memo.setCreatedAt(now);
+    memo.setUpdatedAt(now);
+
     store.put(memo.getId(), memo);
     return memo;
   }
@@ -31,7 +35,7 @@ public class MemoRepository {
     Memo findMemo = store.get(id);
     findMemo.setTitle(updateParam.getTitle());
     findMemo.setContent(updateParam.getContent());
-
+    
     findMemo.setUpdatedAt(LocalDateTime.now());
     return findMemo;
   }

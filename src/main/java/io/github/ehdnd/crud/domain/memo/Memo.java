@@ -14,13 +14,11 @@ public class Memo {
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
-  private Memo() {
+  public Memo() {
   }
 
-  public Memo(String title, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
+  public Memo(String title, String content) {
     this.title = title;
     this.content = content;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
   }
 }
