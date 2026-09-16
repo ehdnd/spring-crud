@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class MemoRepository {
 
   private static final Map<Long, Memo> store = new HashMap<>();
@@ -29,7 +31,7 @@ public class MemoRepository {
     Memo findMemo = store.get(id);
     findMemo.setTitle(updateParam.getTitle());
     findMemo.setContent(updateParam.getContent());
-    
+
     findMemo.setUpdatedAt(LocalDateTime.now());
   }
 
