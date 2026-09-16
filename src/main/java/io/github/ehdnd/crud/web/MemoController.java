@@ -54,6 +54,19 @@ public class MemoController {
     return memoRepository.update(id, updateParam);
   }
 
+  @GetMapping("/add")
+  String getAdd() {
+    log.debug("getAdd");
+    return "ok";
+  }
+
+  @PostMapping("/add")
+  Memo postAdd(@RequestParam String title, @RequestParam String content) {
+    log.debug("postAdd");
+    LocalDateTime now = LocalDateTime.now();
+    Memo memo = new Memo(title, content, now, now);
+    return memoRepository.save(memo);
+  }
 
   @PostConstruct
   void init() {
