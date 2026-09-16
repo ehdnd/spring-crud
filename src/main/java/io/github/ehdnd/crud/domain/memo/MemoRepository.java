@@ -10,8 +10,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MemoRepository {
 
-  private static final Map<Long, Memo> store = new HashMap<>();
-  private static long sequence = 0L;
+  private final Map<Long, Memo> store = new HashMap<>();
+  private long sequence = 0L;
 
   public Memo save(Memo memo) {
     LocalDateTime now = LocalDateTime.now();
@@ -35,7 +35,7 @@ public class MemoRepository {
     Memo findMemo = store.get(id);
     findMemo.setTitle(updateParam.getTitle());
     findMemo.setContent(updateParam.getContent());
-    
+
     findMemo.setUpdatedAt(LocalDateTime.now());
     return findMemo;
   }
