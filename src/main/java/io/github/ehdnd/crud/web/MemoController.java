@@ -35,23 +35,11 @@ public class MemoController {
     return memoRepository.findById(id);
   }
 
-  @GetMapping("/{id}/edit")
-  Memo getEdit(@PathVariable Long id) {
-    log.debug("getEdit");
-    return memoRepository.findById(id);
-  }
-
   @PostMapping("/{id}/edit")
   Memo postEdit(@PathVariable Long id, @ModelAttribute Memo updateParam) {
     log.debug("postEdit");
     log.debug("updateParam: {}", updateParam);
     return memoRepository.update(id, updateParam);
-  }
-
-  @GetMapping("/add")
-  String getAdd() {
-    log.debug("getAdd");
-    return "ok";
   }
 
   @PostMapping("/add")

@@ -11,8 +11,6 @@ Content-Type: application/x-www-form-urlencoded
 title = updatedA &
 content = updateAAA
 
-###
-GET http://localhost:8080/memos/add
 
 ###
 POST http://localhost:8080/memos/add
