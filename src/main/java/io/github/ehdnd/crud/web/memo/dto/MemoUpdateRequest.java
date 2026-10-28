@@ -1,7 +1,6 @@
 package io.github.ehdnd.crud.web.memo.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record MemoUpdateRequest(
@@ -11,7 +10,7 @@ public record MemoUpdateRequest(
     String title,
 
     @NotBlank
-    @Size(min = 10)
+    @Size(max = 1000)
     String content
 
 ) {
