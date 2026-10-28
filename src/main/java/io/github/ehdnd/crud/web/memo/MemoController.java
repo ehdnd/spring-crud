@@ -2,10 +2,12 @@ package io.github.ehdnd.crud.web.memo;
 
 import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoRepository;
+import io.github.ehdnd.crud.web.memo.dto.MemoSaveRequest;
 import jakarta.annotation.PostConstruct;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,8 +30,11 @@ public class MemoController {
   }
 
   @PostMapping()
-  Memo add(@ModelAttribute Memo memo) {
-    log.debug("memo={}", memo);
+  Memo add(@Validated @ModelAttribute MemoSaveRequest memoSaveRequest) {
+    log.debug("memoSaveRequest={}", memoSaveRequest);
+
+    Memo memo = new Memo(memoSaveRequest.title(), memoSaveRequest.content());
+
     return memoRepository.save(memo);
   }
 
