@@ -1,4 +1,4 @@
-package io.github.ehdnd.crud.web;
+package io.github.ehdnd.crud.web.memo;
 
 import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoRepository;
