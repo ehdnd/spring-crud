@@ -3,16 +3,17 @@ package io.github.ehdnd.crud.web.memo;
 import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoRepository;
 import io.github.ehdnd.crud.web.memo.dto.MemoSaveRequest;
+import io.github.ehdnd.crud.web.memo.dto.MemoUpdateRequest;
 import jakarta.annotation.PostConstruct;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +31,7 @@ public class MemoController {
   }
 
   @PostMapping()
-  Memo add(@Validated @ModelAttribute MemoSaveRequest memoSaveRequest) {
+  Memo add(@Validated @RequestBody MemoSaveRequest memoSaveRequest) {
     log.debug("memoSaveRequest={}", memoSaveRequest);
 
     Memo memo = new Memo(memoSaveRequest.title(), memoSaveRequest.content());
@@ -45,9 +46,12 @@ public class MemoController {
   }
 
   @PatchMapping("/{id}")
-  Memo edit(@PathVariable Long id, @ModelAttribute Memo updateParam) {
-    log.debug("updateParam={}", updateParam);
-    return memoRepository.update(id, updateParam);
+  Memo edit(@PathVariable Long id, @RequestBody MemoUpdateRequest memoUpdateRequest) {
+    log.debug("memoUpdateRequest={}", memoUpdateRequest);
+
+    Memo memo = new Memo(memoUpdateRequest.title(), memoUpdateRequest.content());
+
+    return memoRepository.update(id, memo);
   }
 
   @PostConstruct

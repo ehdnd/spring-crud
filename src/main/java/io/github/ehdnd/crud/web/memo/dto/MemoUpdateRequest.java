@@ -6,9 +6,6 @@ import jakarta.validation.constraints.Size;
 
 public record MemoUpdateRequest(
 
-    @NotNull
-    Long id,
-
     @NotBlank
     @Size(max = 20)
     String title,
