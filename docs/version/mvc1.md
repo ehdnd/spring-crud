@@ -36,13 +36,4 @@ io.github.ehdnd.crud
 
 ## 4. API
 
-| Method | URI | 설명 | 정상 응답 |
-| --- | --- | --- | --- |
-| GET | `/memos` | 전체 목록 | 200, `Memo[]` |
-| GET | `/memos/{id}` | 단건 조회 | 200, `Memo` |
-| POST | `/memos` | 생성 (form: `title`, `content`) | 200, 생성된 `Memo` |
-| PATCH | `/memos/{id}` | 수정 (form: `title`, `content`) | 200, 수정된 `Memo` |
-| DELETE | `/memos/{id}` | — | **미구현 (405)** |
-
-
 
