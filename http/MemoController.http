@@ -6,15 +6,19 @@ GET http://localhost:8080/memos/2
 
 ###
 PATCH http://localhost:8080/memos/1
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json
 
-title = updatedA &
-content = updateAAA
+{
+  "title": "updateA",
+  "content": "updateAAA"
+}
 
 
 ###
 POST http://localhost:8080/memos
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json
 
-title = newA &
-content = newAA
+{
+  "title": "newA",
+  "content": "newAAA"
+}
