@@ -46,7 +46,7 @@ public class MemoController {
   }
 
   @PatchMapping("/{id}")
-  Memo edit(@PathVariable Long id, @RequestBody MemoUpdateRequest memoUpdateRequest) {
+  Memo edit(@PathVariable Long id, @Validated @RequestBody MemoUpdateRequest memoUpdateRequest) {
     log.debug("memoUpdateRequest={}", memoUpdateRequest);
 
     Memo memo = new Memo(memoUpdateRequest.title(), memoUpdateRequest.content());
