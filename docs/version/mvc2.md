@@ -19,15 +19,19 @@ MVC2 편 내용을 적용
     - [X] 요청 DTO에 Validation 적용
     - [X] 검증 실패 응답 통일
 
-- [ ] 로그인 - 쿠키, 세션
+- [ ] 로그인
     - [ ] 멤버 만들기
-        - 도메인 / 웹
-        - dto 생성
-        - 메모가 memberId 를 가지자
-    - [ ] 세션 로그인
-
-- [ ] 로그인 - 필터, 인터셉터
+        - [ ] Member + Repository + Test
+        - [ ] 도메인 / 웹
+            - [ ] dto 생성
+                - [ ] Member (id, loginId, password)
+                - [ ] MemberResponse (id, loginId)
+            - [ ] 메모가 memberId 를 가지자
+            - [ ] findByMemberId 추가
+    - [ ] Controller Test
     - [ ] 인터셉터 인증 확인
+    - [ ] 세션도 있어야하고 . .
+    - [ ] 아이디 중복 체크 -> MemberService 추가
 
 - [ ] 예외 처리
     - [ ] 에러 응답 DTO
@@ -38,8 +42,9 @@ MVC2 편 내용을 적용
 
 ### 2-2. non-goal
 
-DB/ JPA
-배포 인증 인가 -> 스프링 시큐리티
+- DB/ JPA
+- 배포 인증 인가 -> 스프링 시큐리티
+- dto 중 password 해싱은 추후 spring-security-crypto 의 BCryptPasswordEncoder 사용하기
 
 ## 3. 구조
 
