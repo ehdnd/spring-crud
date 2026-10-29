@@ -63,7 +63,6 @@ class MemoControllerTest {
 
   @Test
   void add_tooLongTitle() throws Exception {
-
     String title = "a".repeat(21);
 
     // when, then
@@ -75,6 +74,50 @@ class MemoControllerTest {
         .andExpect(status().isBadRequest());
 
     then(memoRepository).should(never()).save(any(Memo.class));
+  }
+
+  @Test
+  void add_blankContent() throws Exception {
+    // when, then
+    mockMvc.perform(post("/memos")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"title": "title", "content": " "}
+                """))
+        .andExpect(status().isBadRequest());
+
+    then(memoRepository).should(never()).save(any(Memo.class));
+  }
+
+  @Test
+  void add_tooLongContent() throws Exception {
+    String content = "a".repeat(1001);
+
+    // when, then
+    mockMvc.perform(post("/memos")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"title": "title", "content": "%s"}
+                """.formatted(content)))
+        .andExpect(status().isBadRequest());
+
+    then(memoRepository).should(never()).save(any(Memo.class));
+  }
+
+  @Test
+  void add_maxLength() throws Exception {
+    String title = "a".repeat(20);
+    String content = "a".repeat(1000);
+
+    // when, then
+    mockMvc.perform(post("/memos")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"title": "%s", "content": "%s"}
+                """.formatted(title, content)))
+        .andExpect(status().isOk());
+
+    then(memoRepository).should().save(any(Memo.class));
   }
 
   @Test
@@ -125,5 +168,49 @@ class MemoControllerTest {
         .andExpect(status().isBadRequest());
 
     then(memoRepository).should(never()).update(any(), any(Memo.class));
+  }
+
+  @Test
+  void edit_blankContent() throws Exception {
+    // when, then
+    mockMvc.perform(patch("/memos/{id}", 1L)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"title": "newTitle", "content": " "}
+                """))
+        .andExpect(status().isBadRequest());
+
+    then(memoRepository).should(never()).update(any(), any(Memo.class));
+  }
+
+  @Test
+  void edit_tooLongContent() throws Exception {
+    String content = "a".repeat(1001);
+
+    // when, then
+    mockMvc.perform(patch("/memos/{id}", 1L)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"title": "newTitle", "content": "%s"}
+                """.formatted(content)))
+        .andExpect(status().isBadRequest());
+
+    then(memoRepository).should(never()).update(any(), any(Memo.class));
+  }
+
+  @Test
+  void edit_maxLength() throws Exception {
+    String title = "a".repeat(20);
+    String content = "a".repeat(1000);
+
+    // when, then
+    mockMvc.perform(patch("/memos/{id}", 1L)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"title": "%s", "content": "%s"}
+                """.formatted(title, content)))
+        .andExpect(status().isOk());
+
+    then(memoRepository).should().update(eq(1L), any(Memo.class));
   }
 }
