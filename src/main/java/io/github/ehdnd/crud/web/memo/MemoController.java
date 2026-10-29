@@ -4,7 +4,6 @@ import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoRepository;
 import io.github.ehdnd.crud.web.memo.dto.MemoSaveRequest;
 import io.github.ehdnd.crud.web.memo.dto.MemoUpdateRequest;
-import jakarta.annotation.PostConstruct;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,13 +51,5 @@ public class MemoController {
     Memo memo = new Memo(memoUpdateRequest.title(), memoUpdateRequest.content());
 
     return memoRepository.update(id, memo);
-  }
-
-  @PostConstruct
-  void init() {
-    log.debug("init");
-
-    memoRepository.save(new Memo("A", "AAA"));
-    memoRepository.save(new Memo("B", "BBB"));
   }
 }
