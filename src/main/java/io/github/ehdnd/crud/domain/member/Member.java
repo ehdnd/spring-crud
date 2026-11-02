@@ -1,14 +1,18 @@
 package io.github.ehdnd.crud.domain.member;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-@Setter
 public class Member {
 
+  @Setter(AccessLevel.PACKAGE)
   private Long id;
+
+  @Setter
   private String loginId;
+  @Setter
   private String password;
 
   public Member() {

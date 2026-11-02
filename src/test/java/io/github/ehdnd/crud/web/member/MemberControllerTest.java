@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(MemberController.class)
@@ -27,9 +28,9 @@ class MemberControllerTest {
   void members() throws Exception {
     // given
     Member member1 = new Member("loginId1", "password1");
-    member1.setId(1L);
+    ReflectionTestUtils.setField(member1, "id", 1);
     Member member2 = new Member("loginId2", "password2");
-    member2.setId(2L);
+    ReflectionTestUtils.setField(member2, "id", 2);
     given(memberRepository.findAll()).willReturn(List.of(member1, member2));
 
     // when, then
