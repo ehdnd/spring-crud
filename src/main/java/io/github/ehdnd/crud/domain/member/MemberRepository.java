@@ -27,7 +27,7 @@ public class MemberRepository {
     return new ArrayList<>(store.values());
   }
 
-  public Optional<Member> findByLoginId(Long loginId) {
+  public Optional<Member> findByLoginId(String loginId) {
     return store.values().stream().filter(member -> member.getLoginId().equals(loginId))
         .findFirst();
   }
