@@ -1,5 +1,15 @@
 package io.github.ehdnd.crud.web.member.dto;
 
-public class MemberSaveRequest {
+import jakarta.validation.constraints.NotBlank;
+
+public record MemberSaveRequest(
+
+    @NotBlank
+    String loginId,
+
+    @NotBlank
+    String password
+
+) {
 
 }
