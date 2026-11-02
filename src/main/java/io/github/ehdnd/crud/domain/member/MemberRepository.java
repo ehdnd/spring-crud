@@ -32,10 +32,9 @@ public class MemberRepository {
         .findFirst();
   }
 
-  public Member update(Long id, Member updateParam) {
+  public Member updatePassword(Long id, String newPassword) {
     Member findMember = store.get(id);
-    findMember.setLoginId(updateParam.getLoginId());
-    findMember.setPassword(updateParam.getPassword());
+    findMember.setPassword(newPassword);
     return findMember;
   }
 
