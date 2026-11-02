@@ -19,14 +19,20 @@ MVC2 편 내용을 적용
     - [X] 요청 DTO에 Validation 적용
     - [X] 검증 실패 응답 통일
 
+- [ ] Memo
+
+
 - [ ] 로그인
     - [ ] 멤버 만들기
         - [ ] Member + Repository + Test
-            - [ ] Member (id, loginId, password)
+            - [X] Member (id - 불변, loginId, password, 등등)
+            - [ ] 닉네임, 소개도 받을 수 있다.
         - [X] loginId 로 검색수행? DB id로 검색 수행? - id
+        - [ ] MemberController Test 작성
         - [ ] 도메인 / 웹
             - [ ] dto 생성
-                - [ ] MemberResponse (id, loginId)
+                - [X] MemberResponse (id, loginId)
+                - [X] MemberPasswordUpdateRequest
             - [ ] 메모가 memberId 를 가지자
             - [ ] findByLoginId 추가
     - [ ] Controller Test
