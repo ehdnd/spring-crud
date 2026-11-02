@@ -22,12 +22,13 @@ MVC2 편 내용을 적용
 - [ ] 로그인
     - [ ] 멤버 만들기
         - [ ] Member + Repository + Test
+            - [ ] Member (id, loginId, password)
+        - [X] loginId 로 검색수행? DB id로 검색 수행? - id
         - [ ] 도메인 / 웹
             - [ ] dto 생성
-                - [ ] Member (id, loginId, password)
                 - [ ] MemberResponse (id, loginId)
             - [ ] 메모가 memberId 를 가지자
-            - [ ] findByMemberId 추가
+            - [ ] findByLoginId 추가
     - [ ] Controller Test
     - [ ] 인터셉터 인증 확인
     - [ ] 세션도 있어야하고 . .
