@@ -1,8 +1,8 @@
 package io.github.ehdnd.crud.web.memo;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -19,13 +19,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(MemoController.class)
 class MemoControllerTest {
@@ -35,17 +35,12 @@ class MemoControllerTest {
   @Autowired
   MockMvc mockMvc;
 
-  @Autowired
-  ObjectMapper objectMapper;
-
   @MockitoBean
   MemoRepository memoRepository;
 
   /**
-   * 검증 실패 입력값 목록
-   * '@MethodSource("invalidRequests")' 가 붙은 테스트가 실행될 때 JUnit 이 호출
-   * Arguments 하나 = 테스트 1회 실행
-   * (설명, title, content) 순서로 테스트 메서드 파라미터에 들어간다.
+   * 검증 실패 입력값 목록 '@MethodSource("invalidRequests")' 가 붙은 테스트가 실행될 때 JUnit 이 호출 Arguments 하나 = 테스트
+   * 1회 실행 (설명, title, content) 순서로 테스트 메서드 파라미터에 들어간다.
    */
   static Stream<Arguments> invalidRequests() {
     return Stream.of(
@@ -67,6 +62,11 @@ class MemoControllerTest {
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.title").value("title"))
         .andExpect(jsonPath("$.content").value("content"));
+
+    ArgumentCaptor<Memo> captor = ArgumentCaptor.forClass(Memo.class);
+    then(memoRepository).should().save(captor.capture());
+    assertThat(captor.getValue()).usingRecursiveComparison()
+        .isEqualTo(new Memo("title", "content"));
   }
 
   @ParameterizedTest(name = "add - {argumentSetName}")
@@ -99,8 +99,11 @@ class MemoControllerTest {
         .andExpect(jsonPath("$.title").value("newTitle"))
         .andExpect(jsonPath("$.content").value("newContent"));
 
-    then(memoRepository).should().update(eq(1L), argThat(memo ->
-        memo.getTitle().equals("newTitle") && memo.getContent().equals("newContent")));
+    ArgumentCaptor<Memo> captor = ArgumentCaptor.forClass(Memo.class);
+    // 리포지토리에 넘겨주는 객체가 올바른지 검증
+    then(memoRepository).should().update(eq(1L), captor.capture());
+    assertThat(captor.getValue()).usingRecursiveComparison()
+        .isEqualTo(new Memo("newTitle", "newContent"));
   }
 
   @ParameterizedTest(name = "edit - {argumentSetName}")
@@ -131,7 +134,6 @@ class MemoControllerTest {
   }
 
   private ResultActions patchMemo(Long id, String title, String content) throws Exception {
-
     return mockMvc.perform(patch("/memos/{id}", id)
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
