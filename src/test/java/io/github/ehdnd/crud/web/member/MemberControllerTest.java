@@ -5,13 +5,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.ehdnd.crud.domain.member.Member;
 import io.github.ehdnd.crud.domain.member.MemberRepository;
-import io.github.ehdnd.crud.web.member.dto.MemberResponse;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -22,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 @WebMvcTest(MemberController.class)
 class MemberControllerTest {
@@ -40,7 +41,7 @@ class MemberControllerTest {
     given(memberRepository.findAll()).willReturn(List.of(member1, member2));
 
     // when, then
-    mockMvc.perform(get("/members"))
+    getMembers()
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(2))
         .andExpect(jsonPath("$[0].id").value(1))
@@ -58,11 +59,7 @@ class MemberControllerTest {
     given(memberRepository.save(any(Member.class))).willReturn(member(1L, "loginId", "password"));
 
     // when, then
-    mockMvc.perform(post("/members")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {"loginId": "loginId", "password": "password"}
-                """))
+    postMember("loginId", "password")
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.loginId").value("loginId"))
@@ -82,15 +79,44 @@ class MemberControllerTest {
     given(memberRepository.findById(any())).willReturn(member(1L, "loginId", "password"));
 
     // when, then
-    mockMvc.perform(get("/members/1")
-            .contentType(MediaType.APPLICATION_JSON))
+    getMember(1L)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.loginId").value("loginId"))
         .andExpect(jsonPath("$.password").doesNotExist());
   }
 
-  // === HELPER ===
+  @Test
+  void editPassword() throws Exception {
+
+  }
+
+  // === HELPERS ===
+
+  private ResultActions getMembers() throws Exception {
+    return mockMvc.perform(get("/members"));
+  }
+
+  private ResultActions postMember(String loginId, String password) throws Exception {
+    return mockMvc.perform(post("/members")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+            {"loginId": "%s", "password": "%s"}
+            """.formatted(loginId, password)));
+  }
+
+  private ResultActions getMember(Long id) throws Exception {
+    return mockMvc.perform(get("/members/{id}", id));
+  }
+
+  private ResultActions patchPassword(Long id, String currentPassword, String newPassword)
+      throws Exception {
+    return mockMvc.perform(patch("/members/{id}/password", id)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+            {"currentPassword": "%s", "newPassword": "%s"}
+            """.formatted(currentPassword, newPassword)));
+  }
 
   private static Member member(Long id, String loginId, String password) {
     Member member = new Member(loginId, password);
