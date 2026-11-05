@@ -2,6 +2,7 @@ package io.github.ehdnd.crud.web.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -88,7 +89,18 @@ class MemberControllerTest {
 
   @Test
   void editPassword() throws Exception {
+    // given
+    given(memberRepository.findById(1L)).willReturn(member(1L, "loginId", "password"));
 
+    // when, then
+    mockMvc.perform(patch("/members/1/password")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"currentPassword":"password", "newPassword":"newPassword"}
+                """))
+        .andExpect(status().isNoContent());
+
+    then(memberRepository).should().updatePassword(1L, "newPassword");
   }
 
   // === HELPERS ===
