@@ -1,7 +1,9 @@
 package io.github.ehdnd.crud.web.member;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -10,9 +12,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import io.github.ehdnd.crud.domain.member.Member;
 import io.github.ehdnd.crud.domain.member.MemberRepository;
 import io.github.ehdnd.crud.web.member.dto.MemberResponse;
-import io.github.ehdnd.crud.web.member.dto.MemberSaveRequest;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -51,7 +54,7 @@ class MemberControllerTest {
   @Test
   void add() throws Exception {
     // given
-    MemberSaveRequest memberSaveRequest = new MemberSaveRequest("loginId", "password");
+    given(memberRepository.findByLoginId("loginId")).willReturn(Optional.empty());
     given(memberRepository.save(any(Member.class))).willReturn(member(1L, "loginId", "password"));
 
     // when, then
@@ -60,9 +63,31 @@ class MemberControllerTest {
             .content("""
                 {"loginId": "loginId", "password": "password"}
                 """))
-        .andExpect(status().isOk());
-    
-    // TODO 이어서 테스트 구현
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.loginId").value("loginId"))
+        .andExpect(jsonPath("$.password").doesNotExist());
+
+    ArgumentCaptor<Member> captor = ArgumentCaptor.forClass(Member.class);
+    then(memberRepository).should().save(captor.capture());
+    Member captured = captor.getValue();
+    assertThat(captured.getId()).isNull();
+    assertThat(captured.getLoginId()).isEqualTo("loginId");
+    assertThat(captured.getPassword()).isEqualTo("password");
+  }
+
+  @Test
+  void member() throws Exception {
+    // given
+    given(memberRepository.findById(any())).willReturn(member(1L, "loginId", "password"));
+
+    // when, then
+    mockMvc.perform(get("/members/1")
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.loginId").value("loginId"))
+        .andExpect(jsonPath("$.password").doesNotExist());
   }
 
   // === HELPER ===
