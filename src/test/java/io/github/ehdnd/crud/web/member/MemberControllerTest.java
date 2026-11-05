@@ -93,11 +93,7 @@ class MemberControllerTest {
     given(memberRepository.findById(1L)).willReturn(member(1L, "loginId", "password"));
 
     // when, then
-    mockMvc.perform(patch("/members/1/password")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {"currentPassword":"password", "newPassword":"newPassword"}
-                """))
+    patchPassword(1L, "password", "newPassword")
         .andExpect(status().isNoContent());
 
     then(memberRepository).should().updatePassword(1L, "newPassword");
