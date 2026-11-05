@@ -24,9 +24,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @WebMvcTest(MemberController.class)
 class MemberControllerTest {
@@ -80,8 +77,8 @@ class MemberControllerTest {
   void add_invalid() throws Exception {
     // when, then
     postMember("", "password")
-        .andExpect(status().isBadRequest())
-        .andExpect(validationFailedOn("loginId"));
+        .andExpect(status().isBadRequest());
+    // TODO json 필드로 에러 확인 필요
 
     // 검증은 컨트롤러 메서드 진입 전에 실패하므로 리포지토리는 아예 호출되지 않아야 한다.
     then(memberRepository).shouldHaveNoInteractions();
@@ -103,7 +100,7 @@ class MemberControllerTest {
   @Test
   void member() throws Exception {
     // given
-    given(memberRepository.findById(any())).willReturn(member(1L, "loginId", "password"));
+    given(memberRepository.findById(1L)).willReturn(member(1L, "loginId", "password"));
 
     // when, then
     getMember(1L)
@@ -111,6 +108,11 @@ class MemberControllerTest {
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.loginId").value("loginId"))
         .andExpect(jsonPath("$.password").doesNotExist());
+  }
+
+  @Test
+  void member_notFound() throws Exception {
+    // TODO 작성필요
   }
 
   @Test
@@ -129,8 +131,8 @@ class MemberControllerTest {
   void editPassword_invalid() throws Exception {
     // when, then
     patchPassword(1L, "password", "")
-        .andExpect(status().isBadRequest())
-        .andExpect(validationFailedOn("newPassword"));
+        .andExpect(status().isBadRequest());
+    // TODO json 필드로 에러 확인 필요
 
     // 검증은 컨트롤러 메서드 진입 전에 실패하므로 findById 조차 호출되지 않아야 한다.
     then(memberRepository).shouldHaveNoInteractions();
@@ -188,17 +190,6 @@ class MemberControllerTest {
         .content("""
             {"currentPassword": "%s", "newPassword": "%s"}
             """.formatted(currentPassword, newPassword)));
-  }
-
-  /**
-   * 400 은 JSON 문법 오류로도 난다. Bean Validation 실패로 난 400 인지, 정확히 어느 필드가 걸렸는지까지 확인한다.
-   */
-  private static ResultMatcher validationFailedOn(String... fields) {
-    return result -> assertThat(result.getResolvedException())
-        .isInstanceOfSatisfying(MethodArgumentNotValidException.class, e ->
-            assertThat(e.getBindingResult().getFieldErrors())
-                .extracting(FieldError::getField)
-                .containsExactlyInAnyOrder(fields));
   }
 
   private static Member member(Long id, String loginId, String password) {

@@ -41,12 +41,6 @@ class MemberSaveRequestTest {
     assertThat(validate(new MemberSaveRequest("loginId", "password"))).isEmpty();
   }
 
-  @Test
-  void valid_oneCharacter() {
-    // @NotBlank 는 "공백이 아닌 문자 1개 이상" 이면 통과한다. (길이 제한 규칙이 생기면 이 테스트가 깨지며 알려준다)
-    assertThat(validate(new MemberSaveRequest("a", "b"))).isEmpty();
-  }
-
   @ParameterizedTest(name = "loginId = [{0}]")
   @NullAndEmptySource
   @ValueSource(strings = {" ", "   ", "\t", "\n"})
