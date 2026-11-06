@@ -3,8 +3,10 @@ package io.github.ehdnd.crud.domain.member;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class Member {
 
   @Setter(AccessLevel.PACKAGE)
@@ -13,6 +15,7 @@ public class Member {
   @Setter
   private String loginId;
   @Setter
+  @ToString.Exclude
   private String password;
 
   public Member() {
