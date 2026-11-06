@@ -2,7 +2,6 @@ package io.github.ehdnd.crud.domain.login;
 
 import io.github.ehdnd.crud.domain.member.Member;
 import io.github.ehdnd.crud.domain.member.MemberRepository;
-import io.github.ehdnd.crud.web.login.dto.LoginRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,10 +15,10 @@ public class LoginService {
 
   private final MemberRepository memberRepository;
 
-  public Member login(LoginRequest loginRequest) {
+  public Member login(String loginId, String password) {
 
-    Member member = memberRepository.findByLoginId(loginRequest.loginId())
-        .filter(m -> m.getPassword().equals(loginRequest.password()))
+    Member member = memberRepository.findByLoginId(loginId)
+        .filter(m -> m.getPassword().equals(password))
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
     log.info("login success member={}", member);
