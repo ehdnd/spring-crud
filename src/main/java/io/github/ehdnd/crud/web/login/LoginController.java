@@ -57,7 +57,7 @@ public class LoginController {
     if (loginMemberId == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
-    Member member = memberRepository.findById(loginMemberId);
+    Member member = memberRepository.findById(loginMemberId).orElse(null);
     if (member == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
