@@ -49,7 +49,7 @@ public class MemberController {
   @GetMapping("/{id}")
   public MemberResponse member(@PathVariable Long id) {
 
-    Member member = memberRepository.findById(id);
+    Member member = memberRepository.findById(id).orElse(null);
     if (member == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
@@ -62,15 +62,23 @@ public class MemberController {
   public void editPassword(@PathVariable Long id,
       @Validated @RequestBody MemberPasswordUpdateRequest memberPasswordUpdateRequest) {
 
-    Member member = memberService.changePassword(id, memberPasswordUpdateRequest.currentPassword(),
-        memberPasswordUpdateRequest.newPassword());
-
+    Member member = memberRepository.findById(id).orElse(null);
     if (member == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다.");
     }
 
-    // 흠.
+    if (!member.matchesPassword(memberPasswordUpdateRequest.currentPassword())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다.");
+    }
+
+    memberRepository.updatePassword(id, memberPasswordUpdateRequest.newPassword());
+
+    // TODO 에러코드 만들기
+    // 실무 표준: ErrorCode + BusinessException + @RestControllerAdvice
+    // global/error/ErrorCode.java - enum 으로 관리
+    // global/error/BusinessException
+    // HTTP 응답으로 반환은 전역 핸들러 하나가 한다고? web/GlobalExceptionHandler
+
   }
 
 }
