@@ -32,7 +32,9 @@ public class LoginController {
   public MemberResponse login(@Validated @RequestBody LoginRequest loginRequest,
       HttpServletRequest request) {
 
-    Member member = loginService.login(loginRequest);
+    Member member = loginService.login(loginRequest.loginId(), loginRequest.password())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    log.info("login success member={}", member);
 
     HttpSession session = request.getSession();
     session.setAttribute(SessionConst.LOGIN_MEMBER_ID, member.getId());
