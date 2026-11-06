@@ -2,6 +2,7 @@ package io.github.ehdnd.crud.web.member;
 
 import io.github.ehdnd.crud.domain.member.Member;
 import io.github.ehdnd.crud.domain.member.MemberRepository;
+import io.github.ehdnd.crud.domain.member.MemberService;
 import io.github.ehdnd.crud.web.member.dto.MemberPasswordUpdateRequest;
 import io.github.ehdnd.crud.web.member.dto.MemberResponse;
 import io.github.ehdnd.crud.web.member.dto.MemberSaveRequest;
@@ -27,6 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class MemberController {
 
   private final MemberRepository memberRepository;
+  private final MemberService memberService;
 
   @GetMapping()
   public List<MemberResponse> members() {
@@ -36,14 +38,12 @@ public class MemberController {
   @PostMapping()
   public MemberResponse add(@Validated @RequestBody MemberSaveRequest memberSaveRequest) {
 
-    if (memberRepository.findByLoginId(memberSaveRequest.loginId()).isPresent()) {
+    Member member = memberService.join(memberSaveRequest.loginId(), memberSaveRequest.password());
+    if (member == null) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다.");
     }
 
-    Member member = new Member(memberSaveRequest.loginId(), memberSaveRequest.password());
-    Member saved = memberRepository.save(member);
-
-    return MemberResponse.from(saved);
+    return MemberResponse.from(member);
   }
 
   @GetMapping("/{id}")
@@ -62,16 +62,15 @@ public class MemberController {
   public void editPassword(@PathVariable Long id,
       @Validated @RequestBody MemberPasswordUpdateRequest memberPasswordUpdateRequest) {
 
-    Member member = memberRepository.findById(id);
+    Member member = memberService.changePassword(id, memberPasswordUpdateRequest.currentPassword(),
+        memberPasswordUpdateRequest.newPassword());
+
     if (member == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+//      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다.");
     }
 
-    if (!member.getPassword().equals(memberPasswordUpdateRequest.currentPassword())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다.");
-    }
-
-    memberRepository.updatePassword(id, memberPasswordUpdateRequest.newPassword());
+    // 흠.
   }
 
 }
