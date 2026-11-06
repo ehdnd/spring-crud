@@ -28,20 +28,31 @@ MVC2 편 내용을 적용
             - [X] Member (id - 불변, loginId, password, 등등)
             - [ ] 닉네임, 소개도 받을 수 있다.
         - [X] loginId 로 검색수행? DB id로 검색 수행? - id
-        - [ ] MemberController Test 작성
+        - [ ] MemberController Test 작성 - 작성중임
         - [ ] 도메인 / 웹
             - [ ] dto 생성
                 - [X] MemberResponse (id, loginId)
                 - [X] MemberPasswordUpdateRequest
-            - [ ] findByLoginId 추가
+            - [X] findByLoginId 추가
     - [ ] Controller Test
-    - [ ] 인터셉터 인증 확인
-    - [ ] 세션
+    - [ ] (CURRENT) 인터셉터 인증 확인
+        - [ ] 로그인하지 안흥면 401로 막자
+        - [ ] `@Login` ArgumentResolver 도입
+        - [ ] 현재 엔드포인트 별로 로그인 여부 결정
+            - POST /members (로그인 X)
+            - POST /login (X)
+            - POST /logout (?)
+            - GET /me (O)
+            - GET /members (?)
+            - GET /members/{id} (?)
+            - PATCH /members/{id}/password (?)
+            - /memos/** - 메모에 이제 작성자 넣어야지 (O)
+    - [X] 세션
     - [ ] 메모가 memberId 를 가지자
         - [ ] MemoResponse DTO 생성
         - [ ] Setter 막아둘 곳 막아두기
         - [ ] 
-    - [ ] 아이디 중복 체크 -> MemberService 추가
+    - [X] 아이디 중복 체크 -> MemberService 추가
 
 - [ ] 예외 처리
     - [ ] 에러 응답 DTO
