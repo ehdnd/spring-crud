@@ -25,4 +25,8 @@ public class Member {
     this.loginId = loginId;
     this.password = password;
   }
+
+  public boolean matchesPassword(String password) {
+    return this.password.equals(password);
+  }
 }
