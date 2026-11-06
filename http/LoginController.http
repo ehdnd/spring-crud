@@ -1,0 +1,26 @@
+### 회원가입 - POST /members
+POST http://localhost:8080/members
+Content-Type: application/json
+
+{
+  "loginId": "loginId",
+  "password": "password"
+}
+
+### 로그인 - POST /login
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "loginId": "loginId",
+  "password": "password"
+}
+
+### 로그인 상태 확인 - GET /me
+GET http://localhost:8080/me
+
+### 로그아웃 - POST /logout
+POST http://localhost:8080/logout
+
+### 로그인 상태 확인 - GET /me
+GET http://localhost:8080/me

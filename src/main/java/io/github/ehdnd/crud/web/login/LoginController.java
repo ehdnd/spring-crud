@@ -1,0 +1,65 @@
+package io.github.ehdnd.crud.web.login;
+
+import io.github.ehdnd.crud.domain.member.Member;
+import io.github.ehdnd.crud.domain.member.MemberRepository;
+import io.github.ehdnd.crud.web.SessionConst;
+import io.github.ehdnd.crud.web.login.dto.LoginRequest;
+import io.github.ehdnd.crud.web.member.dto.MemberResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.server.ResponseStatusException;
+
+@Slf4j
+@RestController
+@RequiredArgsConstructor
+public class LoginController {
+
+  private final MemberRepository memberRepository;
+
+  @PostMapping("/login")
+  public MemberResponse login(@Validated @RequestBody LoginRequest loginRequest,
+      HttpServletRequest request) {
+
+    Member member = memberRepository.findByLoginId(loginRequest.loginId())
+        .filter(m -> m.getPassword().equals(loginRequest.password()))
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.UNAUTHORIZED));
+    log.info("login success member={}", member);
+
+    HttpSession session = request.getSession();
+    session.setAttribute(SessionConst.LOGIN_MEMBER_ID, member.getId());
+    request.changeSessionId();
+    return MemberResponse.from(member);
+  }
+
+  @PostMapping("/logout")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void logout(HttpServletRequest request) {
+    HttpSession session = request.getSession(false);
+    if (session != null) {
+      session.invalidate();
+    }
+  }
+
+  @GetMapping("/me")
+  public MemberResponse me(@SessionAttribute(required = false) Long loginMemberId) {
+    if (loginMemberId == null) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+    }
+    Member member = memberRepository.findById(loginMemberId);
+    if (member == null) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+    }
+    return MemberResponse.from(member);
+  }
+}
