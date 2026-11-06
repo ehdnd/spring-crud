@@ -115,7 +115,12 @@ class MemberControllerTest {
 
   @Test
   void member_notFound() throws Exception {
-    // TODO 작성필요
+    // given
+    given(memberRepository.findById(1L)).willReturn(Optional.empty());
+
+    // when, then
+    getMember(1L)
+        .andExpect(status().isNotFound());
   }
 
   @Test
