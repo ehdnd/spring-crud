@@ -57,7 +57,6 @@ public class MemberController {
     return MemberResponse.from(member);
   }
 
-
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @PatchMapping("/{id}/password")
   public void editPassword(@PathVariable Long id,
