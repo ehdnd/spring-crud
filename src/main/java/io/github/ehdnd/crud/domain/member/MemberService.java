@@ -19,17 +19,5 @@ public class MemberService {
     return memberRepository.save(new Member(loginId, password));
   }
 
-  public Member changePassword(Long id, String currentPassword, String newPassword) {
-
-    Member member = memberRepository.findById(id);
-    if (member == null) {
-      return null;
-    }
-
-    if (!member.matchesPassword(currentPassword)) {
-      return null;
-    }
-
-    return memberRepository.updatePassword(id, newPassword);
-  }
+  // TODO getById 같은거 넣고 없으면 예외 처리해라
 }
