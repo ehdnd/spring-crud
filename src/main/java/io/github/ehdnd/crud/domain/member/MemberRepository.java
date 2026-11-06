@@ -19,8 +19,8 @@ public class MemberRepository {
     return member;
   }
 
-  public Member findById(Long id) {
-    return store.get(id);
+  public Optional<Member> findById(Long id) {
+    return Optional.ofNullable(store.get(id));
   }
 
   public List<Member> findAll() {
