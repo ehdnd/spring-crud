@@ -13,12 +13,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import io.github.ehdnd.crud.domain.member.Member;
 import io.github.ehdnd.crud.domain.member.MemberRepository;
+import io.github.ehdnd.crud.domain.member.MemberService;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -26,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @WebMvcTest(MemberController.class)
+@Import(MemberService.class)
 class MemberControllerTest {
 
   @Autowired
@@ -100,7 +103,7 @@ class MemberControllerTest {
   @Test
   void member() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(member(1L, "loginId", "password"));
+    given(memberRepository.findById(1L)).willReturn(Optional.of(member(1L, "loginId", "password")));
 
     // when, then
     getMember(1L)
@@ -118,7 +121,7 @@ class MemberControllerTest {
   @Test
   void editPassword() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(member(1L, "loginId", "password"));
+    given(memberRepository.findById(1L)).willReturn(Optional.of(member(1L, "loginId", "password")));
 
     // when, then
     patchPassword(1L, "password", "newPassword")
@@ -141,7 +144,7 @@ class MemberControllerTest {
   @Test
   void editPassword_wrongCurrentPassword() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(member(1L, "loginId", "password"));
+    given(memberRepository.findById(1L)).willReturn(Optional.of(member(1L, "loginId", "password")));
 
     // when, then
     patchPassword(1L, "wrongPassword", "newPassword")
@@ -156,7 +159,7 @@ class MemberControllerTest {
   @Test
   void editPassword_notFound() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(null);
+    given(memberRepository.findById(1L)).willReturn(Optional.empty());
 
     // when, then
     patchPassword(1L, "password", "newPassword")
