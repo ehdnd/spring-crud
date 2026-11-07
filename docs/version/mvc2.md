@@ -1,7 +1,7 @@
 # spring-mvc-1 snapshot
 
 작성: 26-10-28
-업데이트: 26-10-29
+업데이트: 26-11-07
 커밋:
 진도: MVC-2 수강 이후 api 서버로 구현
 
@@ -35,23 +35,16 @@ MVC2 편 내용을 적용
                 - [X] MemberPasswordUpdateRequest
             - [X] findByLoginId 추가
     - [ ] Controller Test
-    - [ ] (CURRENT) 인터셉터 인증 확인
-        - [ ] 로그인하지 안흥면 401로 막자
-        - [ ] `@Login` ArgumentResolver 도입
-        - [ ] 현재 엔드포인트 별로 로그인 여부 결정
-            - POST /members (로그인 X)
-            - POST /login (X)
-            - POST /logout (?)
-            - GET /me (O)
-            - GET /members (?)
-            - GET /members/{id} (?)
-            - PATCH /members/{id}/password (?)
-            - /memos/** - 메모에 이제 작성자 넣어야지 (O)
+    - [X] 인터셉터 인증 확인
+        - [X] 로그인하지 않으면 401로 막자 (`LoginCheckInterceptor`)
+        - [X] `@Login` ArgumentResolver 도입 (`@Login Long memberId`)
+        - [X] 현재 엔드포인트 별로 로그인 여부 결정 → [4. API](#4-api)
+        - [X] `PATCH /members/{id}/password` → `PATCH /members/me/password`
     - [X] 세션
-    - [ ] 메모가 memberId 를 가지자
+    - [ ] (CURRENT) 메모가 memberId 를 가지자
         - [ ] MemoResponse DTO 생성
         - [ ] Setter 막아둘 곳 막아두기
-        - [ ] 
+        - [ ] 본인 메모만 조회/수정 (인가) - 남의 메모면 403? 404?
     - [X] 아이디 중복 체크 -> MemberService 추가
 
 - [ ] 예외 처리
@@ -60,6 +53,7 @@ MVC2 편 내용을 적용
     - [ ] 앞서 미뤄둔 테스트 수정
     - [ ] MemberController 에서 비밀번호 에러 처리 구분 - code 필드로 바꾸자
     - [ ] getById
+    - [ ] 401 응답 형식 통일 (인터셉터는 빈 본문, 컨트롤러 예외는 에러 JSON)
 
 - [ ] 타입 컨버터 JSON ?
 
@@ -77,7 +71,33 @@ MVC2 편 내용을 적용
 
 ## 4. API
 
-TBD.
+### 엔드포인트별 로그인 필요 여부
+
+요청한 사람이 누군지 알아야 동작하는가? (인증)
+
++) 본인 것만 허용 = 인가 -> 인터셉터가 아니라 컨트롤러/서비스에서 따로 처리
+
+| 메서드 | 경로                   | 로그인   | 이유                                                                    |
+|--------|------------------------|----------|-------------------------------------------------------------------------|
+| POST   | `/members`             | X        | 회원가입. 아직 누군지 모르는 상태에서 호출                              |
+| GET    | `/members`             | X (임시) | `POST /members`와 경로가 같아서 함께 열림. 전체 회원 목록 공개는 재검토 |
+| GET    | `/members/{id}`        | X        | 공개 프로필. 응답에 loginId가 노출되는 건 재검토                        |
+| PATCH  | `/members/me/password` | O        | 대상 회원을 세션에서 꺼냄. path id를 안 받으니 남의 비밀번호 변경 불가  |
+| POST   | `/login`               | X        | 로그인                                                                  |
+| POST   | `/logout`              | X        | 세션이 없어도 해가 없음. 있으면 무효화, 없으면 그냥 204                 |
+| GET    | `/me`                  | O        | 누군지 모르면 응답을 만들 수 없음                                       |
+| *      | `/memos/**`            | O        | 작성자(memberId)가 필요                                                 |
+| *      | `/error`               | X        | 에러 응답까지 인터셉터에 걸리지 않도록                                  |
+
+#### 구현 메모 (일부)
+
+- `excludePathPatterns` HTTP 메서드 구분 불가 → URL 설계(`/me/...`)로 회피
+- 401(Unauthorized 인증 실패) 2군데
+    - 로그인 X: 인터셉터 (`setStatus(401)` + `return false`, 본문 없음)
+    - 세션 O 회원 X (stale session): 컨트롤러 (`ResponseStatusException`)
+- `@Login Long memberId`
+    - 로그인 안 했으면 null (로그인은 선택)
+    - 인터셉터 걸린 경로는 null 아님 보장 → 컨트롤러 null 체크 X
 
 ## +)
 
@@ -100,7 +120,7 @@ TBD.
 |----------------------------------|-------------------------------------------------------------------------|----------------------------------------------------------------------------|
 | Bean Validation 경계값 검증 위치 | DTO 테스트 (`MemberSaveRequestTest`, `MemberPasswordUpdateRequestTest`) | 컨트롤러 테스트 (`add_invalid`, `edit_invalid` 각 4케이스 + `*_maxLength`) |
 | 컨트롤러의 400 테스트            | 대표 1케이스 (`add_invalid`, `editPassword_invalid`)                    | 파라미터 테스트로 전부                                                     |
-| 없는 id → 404                    | 있음 (`member_notFound`, `editPassword_notFound`)                       | 없음 (보류 항목)                                                           |
+| 없는 id → 404                    | 있음 (`member_notFound`)                                                | 없음 (보류 항목)                                                           |
 | GET 테스트                       | 있음 (`members`, `member`)                                              | 없음                                                                       |
 
 - [ ] Memo도 Member 방식으로 맞출지 결정
