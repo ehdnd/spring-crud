@@ -1,7 +1,10 @@
 package io.github.ehdnd.crud;
 
 import io.github.ehdnd.crud.web.login.LoginCheckInterceptor;
+import io.github.ehdnd.crud.web.login.LoginMemberArgumentResolver;
+import java.util.List;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -15,5 +18,10 @@ public class WebConfig implements WebMvcConfigurer {
         .addPathPatterns("/**")
         // 요청한 사람이 누군지 알아야 동작하는가
         .excludePathPatterns("/members", "/login", "/logout", "/members/*", "/error");
+  }
+
+  @Override
+  public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+    resolvers.add(new LoginMemberArgumentResolver());
   }
 }
