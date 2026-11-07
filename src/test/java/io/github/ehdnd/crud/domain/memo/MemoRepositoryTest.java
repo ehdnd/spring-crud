@@ -17,13 +17,13 @@ class MemoRepositoryTest {
   @Test
   void save() {
     // given
-    Memo memo = new Memo("A", "B");
+    Memo memo = new Memo("A", "B", 1L);
 
     // when
     memoRepository.save(memo);
 
     // then
-    Memo findMemo = memoRepository.findById(memo.getId());
+    Memo findMemo = memoRepository.findById(memo.getId()).orElse(null);
     assertThat(findMemo).isEqualTo(memo);
   }
 }

@@ -56,7 +56,7 @@ class MemoControllerTest {
   @Test
   void add() throws Exception {
     // given
-    given(memoRepository.save(any(Memo.class))).willReturn(memo(1L, "title", "content"));
+    given(memoRepository.save(any(Memo.class))).willReturn(memo(1L, "title", "content", 1L));
 
     // when, then
     postMemo("title", "content", loginSession(1L))
@@ -68,7 +68,7 @@ class MemoControllerTest {
     ArgumentCaptor<Memo> captor = ArgumentCaptor.forClass(Memo.class);
     then(memoRepository).should().save(captor.capture());
     assertThat(captor.getValue()).usingRecursiveComparison()
-        .isEqualTo(new Memo("title", "content"));
+        .isEqualTo(new Memo("title", "content", 1L));
   }
 
   @ParameterizedTest(name = "add - {argumentSetName}")
@@ -102,7 +102,7 @@ class MemoControllerTest {
   @Test
   void edit() throws Exception {
     // given
-    Memo updatedMemo = memo(1L, "newTitle", "newContent");
+    Memo updatedMemo = memo(1L, "newTitle", "newContent", 1L);
     given(memoRepository.update(eq(1L), any(Memo.class))).willReturn(updatedMemo);
 
     // when, then
@@ -116,7 +116,7 @@ class MemoControllerTest {
     // 리포지토리에 넘겨주는 객체가 올바른지 검증
     then(memoRepository).should().update(eq(1L), captor.capture());
     assertThat(captor.getValue()).usingRecursiveComparison()
-        .isEqualTo(new Memo("newTitle", "newContent"));
+        .isEqualTo(new Memo("newTitle", "newContent", 1L));
   }
 
   @ParameterizedTest(name = "edit - {argumentSetName}")
@@ -165,8 +165,8 @@ class MemoControllerTest {
     return session;
   }
 
-  private static Memo memo(Long id, String title, String content) {
-    Memo memo = new Memo(title, content);
+  private static Memo memo(Long id, String title, String content, Long memberId) {
+    Memo memo = new Memo(title, content, memberId);
     memo.setId(id);
     return memo;
   }
