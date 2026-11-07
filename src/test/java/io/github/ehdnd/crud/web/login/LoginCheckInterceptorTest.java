@@ -1,7 +1,7 @@
 package io.github.ehdnd.crud.web.login;
 
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.ehdnd.crud.web.SessionConst;
 import jakarta.servlet.http.HttpServletResponse;

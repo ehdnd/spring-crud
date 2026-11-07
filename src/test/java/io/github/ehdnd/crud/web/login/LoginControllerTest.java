@@ -1,16 +1,17 @@
 package io.github.ehdnd.crud.web.login;
 
-
+import static io.github.ehdnd.crud.support.MemberFixture.createMember;
+import static io.github.ehdnd.crud.support.TestSessions.loginSession;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.ehdnd.crud.domain.login.LoginService;
-import io.github.ehdnd.crud.domain.member.Member;
 import io.github.ehdnd.crud.domain.member.MemberRepository;
 import io.github.ehdnd.crud.web.SessionConst;
 import java.util.Optional;
@@ -20,7 +21,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -38,15 +38,13 @@ class LoginControllerTest {
   @Test
   void login() throws Exception {
     // 세션에 id가 들어갔나
-    // given
-    Member member = new Member("loginId", "password");
-    ReflectionTestUtils.setField(member, "id", 1L);
 
     // 테스트 대상이 직접 호출하는 것만 stub
-    given(loginService.login("loginId", "password")).willReturn(Optional.of(member));
+    given(loginService.login("loginId", "password"))
+        .willReturn(Optional.of(createMember(1L, "loginId", "password")));
 
     // when, then
-    postLogin("loginId", "password")
+    postLogin("loginId", "password", new MockHttpSession())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.loginId").value("loginId"))
@@ -61,10 +59,8 @@ class LoginControllerTest {
     MockHttpSession session = new MockHttpSession();
     String beforeId = session.getId();
 
-    Member member = new Member("loginId", "password");
-    ReflectionTestUtils.setField(member, "id", 1L);
-
-    given(loginService.login("loginId", "password")).willReturn(Optional.of(member));
+    given(loginService.login("loginId", "password"))
+        .willReturn(Optional.of(createMember(1L, "loginId", "password")));
 
     // when
     postLogin("loginId", "password", session)
@@ -82,7 +78,7 @@ class LoginControllerTest {
     given(loginService.login("loginId", "wrong")).willReturn(Optional.empty());
 
     // when, then
-    postLogin("loginId", "wrong")
+    postLogin("loginId", "wrong", new MockHttpSession())
         .andExpect(status().isUnauthorized())
         .andExpect(request().sessionAttributeDoesNotExist(SessionConst.LOGIN_MEMBER_ID));
 
@@ -90,7 +86,7 @@ class LoginControllerTest {
 
   @Test
   void login_invalid() throws Exception {
-    postLogin("", "password")
+    postLogin("", "password", new MockHttpSession())
         .andExpect(status().isBadRequest());
 
     then(loginService).shouldHaveNoInteractions();
@@ -110,16 +106,44 @@ class LoginControllerTest {
     assertThat(mockHttpSession.isInvalid()).isTrue();
   }
 
-  // === HELPER ===
+  @Test
+  void me() throws Exception {
+    // given
+    given(memberRepository.findById(1L)).willReturn(Optional.of(createMember(1L, "loginId", "password")));
 
-  private ResultActions postLogin(String loginId, String password)
-      throws Exception {
-    return mockMvc.perform(post("/login")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("""
-            {"loginId":"%s", "password":"%s"}
-            """.formatted(loginId, password))
-    );
+    // when, then
+    getMe(loginSession(1L))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.loginId").value("loginId"))
+        .andExpect(jsonPath("$.password").doesNotExist());
+  }
+
+
+  @Test
+  void me_notLoggedIn() throws Exception {
+    // when, then
+    mockMvc.perform(get("/me"))
+        .andExpect(status().isUnauthorized());
+
+    then(memberRepository).shouldHaveNoInteractions();
+  }
+
+  @Test
+  void me_staleSession() throws Exception {
+    // given
+    given(memberRepository.findById(1L)).willReturn(Optional.empty());
+
+    // when, then
+    getMe(loginSession(1L))
+        .andExpect(status().isUnauthorized());
+  }
+
+  // === HELPERS ===
+
+  private ResultActions getMe(MockHttpSession session) throws Exception {
+    return mockMvc.perform(get("/me")
+        .session(session));
   }
 
   private ResultActions postLogin(String loginId, String password, MockHttpSession session)
@@ -132,4 +156,5 @@ class LoginControllerTest {
             """.formatted(loginId, password))
     );
   }
+
 }

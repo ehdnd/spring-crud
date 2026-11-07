@@ -1,5 +1,7 @@
 package io.github.ehdnd.crud.web.member;
 
+import static io.github.ehdnd.crud.support.MemberFixture.createMember;
+import static io.github.ehdnd.crud.support.TestSessions.loginSession;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -14,7 +16,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import io.github.ehdnd.crud.domain.member.Member;
 import io.github.ehdnd.crud.domain.member.MemberRepository;
 import io.github.ehdnd.crud.domain.member.MemberService;
-import io.github.ehdnd.crud.web.SessionConst;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -42,8 +42,8 @@ class MemberControllerTest {
   @Test
   void members() throws Exception {
     // given
-    Member member1 = member(1L, "loginId1", "password1");
-    Member member2 = member(2L, "loginId2", "password2");
+    Member member1 = createMember(1L, "loginId1", "password1");
+    Member member2 = createMember(2L, "loginId2", "password2");
     given(memberRepository.findAll()).willReturn(List.of(member1, member2));
 
     // when, then
@@ -62,7 +62,8 @@ class MemberControllerTest {
   void add() throws Exception {
     // given
     given(memberRepository.findByLoginId("loginId")).willReturn(Optional.empty());
-    given(memberRepository.save(any(Member.class))).willReturn(member(1L, "loginId", "password"));
+    given(memberRepository.save(any(Member.class))).willReturn(
+        createMember(1L, "loginId", "password"));
 
     // when, then
     postMember("loginId", "password")
@@ -93,7 +94,7 @@ class MemberControllerTest {
   void add_duplicateLoginId() throws Exception {
     // given
     given(memberRepository.findByLoginId("loginId"))
-        .willReturn(Optional.of(member(1L, "loginId", "password")));
+        .willReturn(Optional.of(createMember(1L, "loginId", "password")));
 
     // when, then
     postMember("loginId", "password")
@@ -105,7 +106,7 @@ class MemberControllerTest {
   @Test
   void member() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(Optional.of(member(1L, "loginId", "password")));
+    given(memberRepository.findById(1L)).willReturn(Optional.of(createMember(1L, "loginId", "password")));
 
     // when, then
     getMember(1L)
@@ -128,7 +129,7 @@ class MemberControllerTest {
   @Test
   void editPassword() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(Optional.of(member(1L, "loginId", "password")));
+    given(memberRepository.findById(1L)).willReturn(Optional.of(createMember(1L, "loginId", "password")));
 
     // when, then
     patchPassword("password", "newPassword", loginSession(1L))
@@ -159,7 +160,7 @@ class MemberControllerTest {
   @Test
   void editPassword_wrongCurrentPassword() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(Optional.of(member(1L, "loginId", "password")));
+    given(memberRepository.findById(1L)).willReturn(Optional.of(createMember(1L, "loginId", "password")));
 
     // when, then
     patchPassword("wrongPassword", "newPassword", loginSession(1L))
@@ -210,17 +211,5 @@ class MemberControllerTest {
         .content("""
             {"currentPassword": "%s", "newPassword": "%s"}
             """.formatted(currentPassword, newPassword)));
-  }
-
-  private static MockHttpSession loginSession(Long id) {
-    MockHttpSession session = new MockHttpSession();
-    session.setAttribute(SessionConst.LOGIN_MEMBER_ID, id);
-    return session;
-  }
-
-  private static Member member(Long id, String loginId, String password) {
-    Member member = new Member(loginId, password);
-    ReflectionTestUtils.setField(member, "id", id);
-    return member;
   }
 }
