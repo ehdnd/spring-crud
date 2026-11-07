@@ -42,9 +42,12 @@ MVC2 편 내용을 적용
         - [X] `PATCH /members/{id}/password` → `PATCH /members/me/password`
     - [X] 세션
     - [ ] (CURRENT) 메모가 memberId 를 가지자
-        - [ ] MemoResponse DTO 생성
-        - [ ] Setter 막아둘 곳 막아두기
+        - [X] MemoResponse DTO 생성
+        - [X] 작성자는 Login 에서 꺼내쓰는 값이다.
+        - [X] Setter 막아둘 곳 막아두기
         - [ ] 본인 메모만 조회/수정 (인가) - 남의 메모면 403? 404?
+        - [ ] 테스트 고치기
+            - [ ] 지금 수정한 건 '필드 하나 추가' + '누가 수정하는가 Memo 스스로 / 리포지토리가' 두 가지의 변경이 하나로 섞인 것이다.
     - [X] 아이디 중복 체크 -> MemberService 추가
 
 - [ ] 예외 처리
