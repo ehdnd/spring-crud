@@ -1,4 +1,4 @@
-# spring-mvc-1 snapshot
+# spring-mvc-2
 
 작성: 26-10-28
 업데이트: 26-11-07
