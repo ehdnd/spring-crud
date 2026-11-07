@@ -39,11 +39,7 @@ class MemoControllerTest {
 
   @MockitoBean
   MemoRepository memoRepository;
-
-  /**
-   * 검증 실패 입력값 목록 '@MethodSource("invalidRequests")' 가 붙은 테스트가 실행될 때 JUnit 이 호출 Arguments 하나 = 테스트
-   * 1회 실행 (설명, title, content) 순서로 테스트 메서드 파라미터에 들어간다.
-   */
+  
   static Stream<Arguments> invalidRequests() {
     return Stream.of(
         argumentSet("title 공백", " ", "content"),
