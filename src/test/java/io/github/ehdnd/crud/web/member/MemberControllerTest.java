@@ -14,14 +14,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import io.github.ehdnd.crud.domain.member.Member;
 import io.github.ehdnd.crud.domain.member.MemberRepository;
 import io.github.ehdnd.crud.domain.member.MemberService;
+import io.github.ehdnd.crud.web.SessionConst;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -129,16 +132,24 @@ class MemberControllerTest {
     given(memberRepository.findById(1L)).willReturn(Optional.of(member(1L, "loginId", "password")));
 
     // when, then
-    patchPassword(1L, "password", "newPassword")
+    patchPassword("password", "newPassword", loginSession(1L))
         .andExpect(status().isNoContent());
 
     then(memberRepository).should().updatePassword(1L, "newPassword");
   }
 
   @Test
+  void editPassword_notLoggedIn() throws Exception {
+    patchPassword("password", "newPassword", new MockHttpSession())
+        .andExpect(status().isUnauthorized());
+
+    then(memberRepository).shouldHaveNoInteractions();
+  }
+
+  @Test
   void editPassword_invalid() throws Exception {
     // when, then
-    patchPassword(1L, "password", "")
+    patchPassword("password", "", loginSession(1L))
         .andExpect(status().isBadRequest());
     // TODO json 필드로 에러 확인 필요
 
@@ -152,7 +163,7 @@ class MemberControllerTest {
     given(memberRepository.findById(1L)).willReturn(Optional.of(member(1L, "loginId", "password")));
 
     // when, then
-    patchPassword(1L, "wrongPassword", "newPassword")
+    patchPassword("wrongPassword", "newPassword", loginSession(1L))
         .andExpect(status().isBadRequest())
         // 검증 실패 400 과 구분: 비밀번호 불일치로 난 400 인지 사유까지 확인한다.
         // TODO 비밀번호 불일치와 검증실패 구분이 필요하다.
@@ -162,13 +173,13 @@ class MemberControllerTest {
   }
 
   @Test
-  void editPassword_notFound() throws Exception {
+  void editPassword_staleSession() throws Exception {
     // given
     given(memberRepository.findById(1L)).willReturn(Optional.empty());
 
     // when, then
-    patchPassword(1L, "password", "newPassword")
-        .andExpect(status().isNotFound());
+    patchPassword("password", "newPassword", loginSession(1L))
+        .andExpect(status().isUnauthorized());
 
     then(memberRepository).should(never()).updatePassword(any(), any());
   }
@@ -191,13 +202,21 @@ class MemberControllerTest {
     return mockMvc.perform(get("/members/{id}", id));
   }
 
-  private ResultActions patchPassword(Long id, String currentPassword, String newPassword)
+  private ResultActions patchPassword(String currentPassword, String newPassword,
+      MockHttpSession session)
       throws Exception {
-    return mockMvc.perform(patch("/members/{id}/password", id)
+    return mockMvc.perform(patch("/members/me/password")
+        .session(session)
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
             {"currentPassword": "%s", "newPassword": "%s"}
             """.formatted(currentPassword, newPassword)));
+  }
+
+  private static MockHttpSession loginSession(Long id) {
+    MockHttpSession session = new MockHttpSession();
+    session.setAttribute(SessionConst.LOGIN_MEMBER_ID, id);
+    return session;
   }
 
   private static Member member(Long id, String loginId, String password) {
