@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoRepository;
+import io.github.ehdnd.crud.web.SessionConst;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -57,7 +59,7 @@ class MemoControllerTest {
     given(memoRepository.save(any(Memo.class))).willReturn(memo(1L, "title", "content"));
 
     // when, then
-    postMemo("title", "content")
+    postMemo("title", "content", loginSession(1L))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.title").value("title"))
@@ -73,7 +75,8 @@ class MemoControllerTest {
   @MethodSource("invalidRequests")
   void add_invalid(String title, String content) throws Exception {
     // when, then
-    postMemo(title, content).andExpect(status().isBadRequest());
+    postMemo(title, content, loginSession(1L))
+        .andExpect(status().isBadRequest());
 
     then(memoRepository).should(never()).save(any(Memo.class));
   }
@@ -81,9 +84,19 @@ class MemoControllerTest {
   @Test
   void add_maxLength() throws Exception {
     // when, then
-    postMemo("a".repeat(20), "a".repeat(1000)).andExpect(status().isOk());
+    postMemo("a".repeat(20), "a".repeat(1000), loginSession(1L))
+        .andExpect(status().isOk());
 
     then(memoRepository).should().save(any(Memo.class));
+  }
+
+  @Test
+  void add_notLoggedIn() throws Exception {
+    // when, then
+    postMemo("title", "content", new MockHttpSession())
+        .andExpect(status().isUnauthorized());
+
+    then(memoRepository).shouldHaveNoInteractions();
   }
 
   @Test
@@ -93,7 +106,7 @@ class MemoControllerTest {
     given(memoRepository.update(eq(1L), any(Memo.class))).willReturn(updatedMemo);
 
     // when, then
-    patchMemo(1L, "newTitle", "newContent")
+    patchMemo(1L, "newTitle", "newContent", loginSession(1L))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.title").value("newTitle"))
@@ -109,7 +122,7 @@ class MemoControllerTest {
   @ParameterizedTest(name = "edit - {argumentSetName}")
   @MethodSource("invalidRequests")
   void edit_invalid(String title, String content) throws Exception {
-    patchMemo(1L, title, content).andExpect(status().isBadRequest());
+    patchMemo(1L, title, content, loginSession(1L)).andExpect(status().isBadRequest());
 
     then(memoRepository).should(never()).update(any(), any(Memo.class));
   }
@@ -118,27 +131,38 @@ class MemoControllerTest {
   @Test
   void edit_maxLength() throws Exception {
     // when, then
-    patchMemo(1L, "a".repeat(20), "a".repeat(1000)).andExpect(status().isOk());
+    patchMemo(1L, "a".repeat(20), "a".repeat(1000), loginSession(1L)).andExpect(status().isOk());
 
     then(memoRepository).should().update(eq(1L), any(Memo.class));
   }
 
   // === HELPERS ===
 
-  private ResultActions postMemo(String title, String content) throws Exception {
+  private ResultActions postMemo(String title, String content, MockHttpSession session)
+      throws Exception {
     return mockMvc.perform(post("/memos")
+        .session(session)
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
             {"title": "%s", "content": "%s"}
             """.formatted(title, content)));
   }
 
-  private ResultActions patchMemo(Long id, String title, String content) throws Exception {
-    return mockMvc.perform(patch("/memos/{id}", id)
+  private ResultActions patchMemo(Long memoId, String title, String content,
+      MockHttpSession session)
+      throws Exception {
+    return mockMvc.perform(patch("/memos/{id}", memoId)
+        .session(session)
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
             {"title": "%s", "content": "%s"}
             """.formatted(title, content)));
+  }
+
+  private static MockHttpSession loginSession(Long memberId) {
+    MockHttpSession session = new MockHttpSession();
+    session.setAttribute(SessionConst.LOGIN_MEMBER_ID, memberId);
+    return session;
   }
 
   private static Memo memo(Long id, String title, String content) {
