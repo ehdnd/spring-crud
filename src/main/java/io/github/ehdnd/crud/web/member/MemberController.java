@@ -3,7 +3,7 @@ package io.github.ehdnd.crud.web.member;
 import io.github.ehdnd.crud.domain.member.Member;
 import io.github.ehdnd.crud.domain.member.MemberRepository;
 import io.github.ehdnd.crud.domain.member.MemberService;
-import io.github.ehdnd.crud.web.SessionConst;
+import io.github.ehdnd.crud.web.login.Login;
 import io.github.ehdnd.crud.web.member.dto.MemberPasswordUpdateRequest;
 import io.github.ehdnd.crud.web.member.dto.MemberResponse;
 import io.github.ehdnd.crud.web.member.dto.MemberSaveRequest;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
@@ -61,11 +60,10 @@ public class MemberController {
 
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @PatchMapping("/me/password")
-  public void editPassword(
-      @SessionAttribute(name = SessionConst.LOGIN_MEMBER_ID) Long id,
+  public void editPassword(@Login Long memberId,
       @Validated @RequestBody MemberPasswordUpdateRequest memberPasswordUpdateRequest) {
 
-    Member member = memberRepository.findById(id).orElse(null);
+    Member member = memberRepository.findById(memberId).orElse(null);
     if (member == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
@@ -73,7 +71,7 @@ public class MemberController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다.");
     }
 
-    memberRepository.updatePassword(id, memberPasswordUpdateRequest.newPassword());
+    memberRepository.updatePassword(memberId, memberPasswordUpdateRequest.newPassword());
 
     // TODO 에러코드 만들기
     // 실무 표준: ErrorCode + BusinessException + @RestControllerAdvice
