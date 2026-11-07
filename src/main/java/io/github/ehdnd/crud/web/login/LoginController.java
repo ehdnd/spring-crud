@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
@@ -53,11 +52,9 @@ public class LoginController {
   }
 
   @GetMapping("/me")
-  public MemberResponse me(@SessionAttribute(required = false) Long loginMemberId) {
-    if (loginMemberId == null) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-    }
-    Member member = memberRepository.findById(loginMemberId).orElse(null);
+  public MemberResponse me(@Login Long memberId) {
+    // 인터셉터 이후 (true) = 세션이 있고 LOGIN_MEMBER_ID 존재도 보장됨
+    Member member = memberRepository.findById(memberId).orElse(null);
     if (member == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
