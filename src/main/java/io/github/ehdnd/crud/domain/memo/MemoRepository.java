@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -30,16 +31,7 @@ public class MemoRepository {
   public List<Memo> findAll() {
     return new ArrayList<>(store.values());
   }
-
-  public Memo update(Long id, Memo updateParam) {
-    Memo findMemo = store.get(id);
-    findMemo.setTitle(updateParam.getTitle());
-    findMemo.setContent(updateParam.getContent());
-
-    findMemo.setUpdatedAt(LocalDateTime.now());
-    return findMemo;
-  }
-
+  
   public void clear() {
     store.clear();
   }
