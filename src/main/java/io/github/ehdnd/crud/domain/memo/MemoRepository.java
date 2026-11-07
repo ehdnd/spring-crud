@@ -24,8 +24,12 @@ public class MemoRepository {
     return memo;
   }
 
-  public Memo findById(Long id) {
-    return store.get(id);
+  public Optional<Memo> findById(Long id) {
+    return Optional.ofNullable(store.get(id));
+  }
+
+  public List<Memo> findByMemberId(Long memberId) {
+    return store.values().stream().filter(m -> memberId.equals(m.getMemberId())).toList();
   }
 
   public List<Memo> findAll() {
