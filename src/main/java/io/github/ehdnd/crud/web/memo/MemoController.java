@@ -26,12 +26,13 @@ public class MemoController {
 
   private final MemoRepository memoRepository;
 
-  @GetMapping()
-  List<Memo> memos() {
-    return memoRepository.findAll();
+  @GetMapping
+  List<Memo> memos(@Login Long memberId) {
+    // 인터셉터가 이미 로그인 사용자 확인함 -> memberId 가 있다.
+    return memoRepository.findByMemberId(memberId);
   }
 
-  @PostMapping()
+  @PostMapping
   Memo add(@Login Long memberId, @Validated @RequestBody MemoSaveRequest memoSaveRequest) {
 
     Memo memo = new Memo(memoSaveRequest.title(), memoSaveRequest.content(), memberId);
@@ -39,8 +40,9 @@ public class MemoController {
   }
 
   @GetMapping("/{id}")
-  Memo memo(@PathVariable Long id) {
-    return memoRepository.findById(id)
+  Memo memo(@Login Long memberId, @PathVariable Long id) {
+    // 자신의 메모만 -> 남의 메모는 404 존재 숨김
+    return memoRepository.findById(id).filter(m -> memberId.equals(m.getMemberId()))
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
