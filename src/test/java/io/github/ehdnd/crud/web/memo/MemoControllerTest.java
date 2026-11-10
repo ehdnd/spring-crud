@@ -135,7 +135,27 @@ class MemoControllerTest {
     // when, then
     patchMemo(1L, "a".repeat(20), "a".repeat(1000), loginSession(1L))
         .andExpect(status().isOk());
+  }
 
+  @Test
+  void edit_invalidId() throws Exception {
+    // given
+    given(memoRepository.findById(1L)).willReturn(Optional.empty());
+
+    // when, then
+    patchMemo(1L, "a".repeat(20), "a".repeat(1000), loginSession(1L))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void edit_notMyMemo() throws Exception {
+    // given
+    Memo memo = memo(1L, "title", "content", 1L);
+    given(memoRepository.findById(1L)).willReturn(Optional.of(memo));
+
+    // when, then
+    patchMemo(1L, "title", "content", loginSession(2L))
+        .andExpect(status().isForbidden());
   }
 
   // === HELPERS ===
