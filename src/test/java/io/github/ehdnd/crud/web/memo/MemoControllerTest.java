@@ -1,6 +1,6 @@
 package io.github.ehdnd.crud.web.memo;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -15,7 +15,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoRepository;
 import io.github.ehdnd.crud.web.SessionConst;
+import java.util.Optional;
 import java.util.stream.Stream;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -26,6 +28,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -39,7 +42,7 @@ class MemoControllerTest {
 
   @MockitoBean
   MemoRepository memoRepository;
-  
+
   static Stream<Arguments> invalidRequests() {
     return Stream.of(
         argumentSet("title 공백", " ", "content"),
@@ -98,8 +101,8 @@ class MemoControllerTest {
   @Test
   void edit() throws Exception {
     // given
-    Memo updatedMemo = memo(1L, "newTitle", "newContent", 1L);
-    given(memoRepository.update(eq(1L), any(Memo.class))).willReturn(updatedMemo);
+    Memo memo = memo(1L, "title", "content", 1L);
+    given(memoRepository.findById(1L)).willReturn(Optional.of(memo));
 
     // when, then
     patchMemo(1L, "newTitle", "newContent", loginSession(1L))
@@ -108,28 +111,31 @@ class MemoControllerTest {
         .andExpect(jsonPath("$.title").value("newTitle"))
         .andExpect(jsonPath("$.content").value("newContent"));
 
-    ArgumentCaptor<Memo> captor = ArgumentCaptor.forClass(Memo.class);
-    // 리포지토리에 넘겨주는 객체가 올바른지 검증
-    then(memoRepository).should().update(eq(1L), captor.capture());
-    assertThat(captor.getValue()).usingRecursiveComparison()
-        .isEqualTo(new Memo("newTitle", "newContent", 1L));
+    assertThat(memo.getTitle()).isEqualTo("newTitle");
+    assertThat(memo.getContent()).isEqualTo("newContent");
   }
 
   @ParameterizedTest(name = "edit - {argumentSetName}")
   @MethodSource("invalidRequests")
   void edit_invalid(String title, String content) throws Exception {
-    patchMemo(1L, title, content, loginSession(1L)).andExpect(status().isBadRequest());
+    patchMemo(1L, title, content, loginSession(1L))
+        .andExpect(status().isBadRequest());
 
-    then(memoRepository).should(never()).update(any(), any(Memo.class));
+    // 검증에 실패해서 findById 도 호출되지 않았음을 검증.
+    then(memoRepository).shouldHaveNoInteractions();
   }
 
 
   @Test
   void edit_maxLength() throws Exception {
-    // when, then
-    patchMemo(1L, "a".repeat(20), "a".repeat(1000), loginSession(1L)).andExpect(status().isOk());
+    // given
+    Memo memo = memo(1L, "title", "content", 1L);
+    given(memoRepository.findById(1L)).willReturn(Optional.of(memo));
 
-    then(memoRepository).should().update(eq(1L), any(Memo.class));
+    // when, then
+    patchMemo(1L, "a".repeat(20), "a".repeat(1000), loginSession(1L))
+        .andExpect(status().isOk());
+
   }
 
   // === HELPERS ===
@@ -163,7 +169,7 @@ class MemoControllerTest {
 
   private static Memo memo(Long id, String title, String content, Long memberId) {
     Memo memo = new Memo(title, content, memberId);
-    memo.setId(id);
+    ReflectionTestUtils.setField(memo, "id", id);
     return memo;
   }
 }
