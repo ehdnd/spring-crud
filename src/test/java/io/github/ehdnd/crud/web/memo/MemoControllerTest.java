@@ -134,6 +134,9 @@ class MemoControllerTest {
 
   @Test
   void add_maxLength() throws Exception {
+    // given
+    given(memoRepository.save(any(Memo.class))).willAnswer(inv -> inv.getArgument(0));
+
     // when, then
     postMemo("a".repeat(20), "a".repeat(1000), loginSession(1L))
         .andExpect(status().isOk());
