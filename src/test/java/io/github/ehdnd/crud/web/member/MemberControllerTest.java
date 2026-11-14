@@ -161,7 +161,6 @@ class MemberControllerTest {
   }
 
   @Test
-  @Disabled("TODO")
   void editPassword_wrongCurrentPassword() throws Exception {
     // given
     given(memberRepository.findById(1L)).willReturn(
@@ -172,7 +171,7 @@ class MemberControllerTest {
         .andExpect(status().isBadRequest())
         // 검증 실패 400 과 구분: 비밀번호 불일치로 난 400 인지 사유까지 확인한다.
         // TODO 비밀번호 불일치와 검증실패 구분이 필요하다.
-        .andExpect(status().reason("현재 비밀번호가 일치하지 않습니다."));
+        .andExpect(jsonPath("$.detail").value("현재 비밀번호가 일치하지 않습니다."));
 
     then(memberRepository).should(never()).updatePassword(any(), any());
   }
