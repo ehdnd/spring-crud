@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoRepository;
 import io.github.ehdnd.crud.web.SessionConst;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Disabled;
@@ -86,20 +87,19 @@ class MemoControllerTest {
   }
 
   @Test
-  @Disabled("TODO")
   void memos() throws Exception {
     // 두 회원이 메모 모두 조회 시 자신의 메모만 제공
-    Memo memo1 = memo(1L, "title", "content", 1L);
-    Memo memo2 = memo(2L, "title", "content", 2L);
+    // 컨트롤러: 리포지토리에서 받은 결과를 그대로 리턴하는가
+    // 리포지토리: 두 명의 메모가 섞여있을 때 한 회원의 메모만 돌려주는가 - `MemoRepositoryTest`
 
-    given(memoRepository.findById(1L)).willReturn(Optional.of(memo1));
-    given(memoRepository.findById(2L)).willReturn(Optional.of(memo2));
+    given(memoRepository.findByMemberId(1L)).willReturn(List.of(memo(1L, "title", "content", 1L)));
 
     getMemos(loginSession(1L))
-        .andExpect(status().isOk());
-
-    getMemos(loginSession(2L))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$[0].id").value(1))
+        .andExpect(jsonPath("$[0].title").value("title"))
+        .andExpect(jsonPath("$[0].content").value("content"));
   }
 
   @Test
