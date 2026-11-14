@@ -28,6 +28,10 @@ public class Memo {
     this.memberId = memberId;
   }
 
+  public boolean isOwnedBy(Long memberId) {
+    return memberId != null && memberId.equals(this.memberId);
+  }
+
   /**
    * 수정 가능한 값(title, content)은 이 메서드로만 바뀐다.
    */
