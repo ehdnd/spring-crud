@@ -90,7 +90,9 @@ class MemoControllerTest {
     given(memoRepository.findById(1L)).willReturn(Optional.empty());
 
     getMemo(1L, loginSession(1L))
-        .andExpect(status().isNotFound());
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code").value("MEMO_NOT_FOUND"))
+        .andExpect(jsonPath("$.detail").exists());
   }
 
   @Test
