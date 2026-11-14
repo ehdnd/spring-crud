@@ -46,10 +46,9 @@ public class MemoController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
-  // TODO PutMapping 으로 수정 (검증 규칙을 유지하자)
   // TODO 또는 추후 Patch 로 일부 필드만 수정 가능하게 또는 JsonNullable 등 도입해야.
-  @PatchMapping("/{memoId}")
-  Memo edit(@Login Long memberId, @PathVariable Long memoId,
+  @PutMapping("/{memoId}")
+  MemoResponse edit(@Login Long memberId, @PathVariable Long memoId,
       @Validated @RequestBody MemoUpdateRequest memoUpdateRequest) {
 
     Memo memo = memoRepository.findById(memoId).filter(m -> memberId.equals(m.getMemberId()))
