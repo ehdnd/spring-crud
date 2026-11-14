@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -39,6 +40,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         errorCode.getMessage());
     problemDetail.setProperty("code", errorCode.name());
     return problemDetail;
+  }
+
+  @Override
+  protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(
+      MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status,
+      WebRequest request) {
+
+    // TODO 오버라이드 - 검증 실패 - INVALID_INPUT, errors 추가
+    return super.handleMethodArgumentNotValid(ex, headers, status, request);
   }
 
   // 부모가 처리하는 스프링 표준 예외는 전부 응답 직전에 이 메서드를 지남 -> 여기서 code 만 추가
