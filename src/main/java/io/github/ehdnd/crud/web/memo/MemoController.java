@@ -56,7 +56,7 @@ public class MemoController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
     if (!memo.getMemberId().equals(memberId)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
     memo.update(memoUpdateRequest.title(), memoUpdateRequest.content());
