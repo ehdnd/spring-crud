@@ -7,7 +7,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -18,7 +18,6 @@ import io.github.ehdnd.crud.web.SessionConst;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -155,7 +154,7 @@ class MemoControllerTest {
     given(memoRepository.findById(1L)).willReturn(Optional.of(memo));
 
     // when, then
-    patchMemo(1L, "newTitle", "newContent", loginSession(1L))
+    putMemo(1L, "newTitle", "newContent", loginSession(1L))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.title").value("newTitle"))
@@ -168,7 +167,7 @@ class MemoControllerTest {
   @ParameterizedTest(name = "edit - {argumentSetName}")
   @MethodSource("invalidRequests")
   void edit_invalid(String title, String content) throws Exception {
-    patchMemo(1L, title, content, loginSession(1L))
+    putMemo(1L, title, content, loginSession(1L))
         .andExpect(status().isBadRequest());
 
     // 검증에 실패해서 findById 도 호출되지 않았음을 검증.
@@ -183,7 +182,7 @@ class MemoControllerTest {
     given(memoRepository.findById(1L)).willReturn(Optional.of(memo));
 
     // when, then
-    patchMemo(1L, "a".repeat(20), "a".repeat(1000), loginSession(1L))
+    putMemo(1L, "a".repeat(20), "a".repeat(1000), loginSession(1L))
         .andExpect(status().isOk());
   }
 
@@ -193,7 +192,7 @@ class MemoControllerTest {
     given(memoRepository.findById(1L)).willReturn(Optional.empty());
 
     // when, then
-    patchMemo(1L, "a".repeat(20), "a".repeat(1000), loginSession(1L))
+    putMemo(1L, "a".repeat(20), "a".repeat(1000), loginSession(1L))
         .andExpect(status().isNotFound());
   }
 
@@ -204,7 +203,7 @@ class MemoControllerTest {
     given(memoRepository.findById(1L)).willReturn(Optional.of(memo));
 
     // when, then
-    patchMemo(1L, "newTitle", "newContent", loginSession(2L))
+    putMemo(1L, "newTitle", "newContent", loginSession(2L))
         .andExpect(status().isNotFound());
 
     assertThat(memo.getTitle()).isEqualTo("title");
@@ -234,10 +233,10 @@ class MemoControllerTest {
             """.formatted(title, content)));
   }
 
-  private ResultActions patchMemo(Long memoId, String title, String content,
+  private ResultActions putMemo(Long memoId, String title, String content,
       MockHttpSession session)
       throws Exception {
-    return mockMvc.perform(patch("/memos/{id}", memoId)
+    return mockMvc.perform(put("/memos/{id}", memoId)
         .session(session)
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
