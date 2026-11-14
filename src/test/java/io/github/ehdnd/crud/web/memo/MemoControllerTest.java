@@ -9,12 +9,14 @@ import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoRepository;
 import io.github.ehdnd.crud.web.SessionConst;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -28,6 +30,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -55,15 +58,25 @@ class MemoControllerTest {
   @Test
   void memo() throws Exception {
     // 내 메모를 조회하면 200 + 정상 응답
+    // given
     Memo memo = memo(1L, "title", "content", 1L);
+    ReflectionTestUtils.setField(memo, "createdAt", LocalDateTime.of(2026, 11, 14, 10, 0, 0));
+    ReflectionTestUtils.setField(memo, "updatedAt", LocalDateTime.of(2026, 11, 14, 11, 30, 0));
+
     given(memoRepository.findById(1L)).willReturn(Optional.of(memo));
 
+    // when, then
     getMemo(1L, loginSession(1L))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.title").value("title"))
-        .andExpect(jsonPath("$.content").value("content"))
-        .andExpect(jsonPath("$.memberId").doesNotExist());
+        .andExpect(content().json("""
+            {
+              "id": 1,
+              "title": "title",
+              "content": "content",
+              "createdAt": "2026-11-14T10:00:00",
+              "updatedAt": "2026-11-14T11:30:00"
+            }
+            """, JsonCompareMode.STRICT));
   }
 
   @Test
@@ -97,8 +110,7 @@ class MemoControllerTest {
         .andExpect(jsonPath("$.length()").value(1))
         .andExpect(jsonPath("$[0].id").value(1))
         .andExpect(jsonPath("$[0].title").value("title"))
-        .andExpect(jsonPath("$[0].content").value("content"))
-        .andExpect(jsonPath("$[0].memberId").doesNotExist());
+        .andExpect(jsonPath("$[0].content").value("content"));
   }
 
   @Test
