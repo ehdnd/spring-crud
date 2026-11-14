@@ -39,20 +39,20 @@ public class MemoController {
     return memoRepository.save(memo);
   }
 
-  @GetMapping("/{id}")
-  Memo memo(@Login Long memberId, @PathVariable Long id) {
+  @GetMapping("/{memoId}")
+  Memo memo(@Login Long memberId, @PathVariable Long memoId) {
     // 자신의 메모만 -> 남의 메모는 404 존재 숨김
-    return memoRepository.findById(id).filter(m -> memberId.equals(m.getMemberId()))
+    return memoRepository.findById(memoId).filter(m -> memberId.equals(m.getMemberId()))
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
   // TODO PutMapping 으로 수정 (검증 규칙을 유지하자)
   // TODO 또는 추후 Patch 로 일부 필드만 수정 가능하게 또는 JsonNullable 등 도입해야.
-  @PatchMapping("/{id}")
-  Memo edit(@Login Long memberId, @PathVariable Long id,
+  @PatchMapping("/{memoId}")
+  Memo edit(@Login Long memberId, @PathVariable Long memoId,
       @Validated @RequestBody MemoUpdateRequest memoUpdateRequest) {
 
-    Memo memo = memoRepository.findById(id)
+    Memo memo = memoRepository.findById(memoId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
     if (!memo.getMemberId().equals(memberId)) {
