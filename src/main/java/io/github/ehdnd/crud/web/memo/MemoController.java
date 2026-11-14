@@ -52,12 +52,8 @@ public class MemoController {
   Memo edit(@Login Long memberId, @PathVariable Long memoId,
       @Validated @RequestBody MemoUpdateRequest memoUpdateRequest) {
 
-    Memo memo = memoRepository.findById(memoId)
+    Memo memo = memoRepository.findById(memoId).filter(m -> memberId.equals(m.getMemberId()))
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-    if (!memo.getMemberId().equals(memberId)) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-    }
 
     memo.update(memoUpdateRequest.title(), memoUpdateRequest.content());
     return memo;
