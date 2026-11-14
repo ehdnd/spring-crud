@@ -1,7 +1,7 @@
 # spring-mvc-2
 
 작성: 26-10-28
-업데이트: 26-11-07
+업데이트: 26-11-14
 커밋:
 진도: MVC-2 수강 이후 api 서버로 구현
 
@@ -28,37 +28,43 @@ MVC2 편 내용을 적용
             - [X] Member (id - 불변, loginId, password, 등등)
             - [ ] 닉네임, 소개도 받을 수 있다.
         - [X] loginId 로 검색수행? DB id로 검색 수행? - id
-        - [ ] MemberController Test 작성 - 작성중임
-        - [ ] 도메인 / 웹
-            - [ ] dto 생성
+        - [X] MemberController Test
+        - [X] 도메인 / 웹
+            - [X] dto 생성
                 - [X] MemberResponse (id, loginId)
                 - [X] MemberPasswordUpdateRequest
             - [X] findByLoginId 추가
-    - [ ] Controller Test
+    - [X] Controller Test
     - [X] 인터셉터 인증 확인
         - [X] 로그인하지 않으면 401로 막자 (`LoginCheckInterceptor`)
         - [X] `@Login` ArgumentResolver 도입 (`@Login Long memberId`)
         - [X] 현재 엔드포인트 별로 로그인 여부 결정 → [4. API](#4-api)
         - [X] `PATCH /members/{id}/password` → `PATCH /members/me/password`
     - [X] 세션
-    - [ ] (CURRENT) 메모가 memberId 를 가지자
+    - [X] (CURRENT) 메모가 memberId 를 가지자
         - [X] MemoResponse DTO 생성
         - [X] 작성자는 Login 에서 꺼내쓰는 값이다.
         - [X] Setter 막아둘 곳 막아두기
-        - [ ] 본인 메모만 조회/수정 (인가) - 남의 메모면 403? 404? -> 404 존재 사실을 숨기자
-        - [ ] 테스트 고치기
+        - [X] 본인 메모만 조회/수정 (인가) - 남의 메모면 403? 404? -> 404 존재 사실을 숨기자
+        - [X] 테스트 고치기
             - [X] 지금 수정한 건 '필드 하나 추가' + '누가 수정하는가 Memo 스스로 / 리포지토리가' 두 가지의 변경이 하나로 섞인 것이다.
-            - [ ] edit 없는 아이디 / edit 남의 메모 검증 등
-        - [ ] 내 메모만 보기? 공유하기? 일단 내 메모만 보고 추후 공개 메모 도입할까?
-        - [ ] 로그인 적용하기
-        - [ ] 메모의 멤버 아이디 노출 여부 결정
+            - [X] edit 없는 아이디 / edit 남의 메모 검증 등
+        - [X] 내 메모만 보기? 공유하기? 일단 내 메모만 보고 추후 공개 메모 도입.
+        - [X] 로그인 적용하기
+        - [X] 메모의 멤버 아이디 노출 여부 결정. 안보이고 추후에 멤버 닉네임 도입 시 적용.
     - [X] 아이디 중복 체크 -> MemberService 추가
+    - [ ] 메모 삭제 delete 추가 - 일단 뒤로 미룸
     - [ ] MemoService 추가
+        - [ ] memo.isOwnedBy 추가
+        - [ ] 찾기, 주인확인, 수정, 저장 옮기기
+        - [ ] memo.isOwnedBy - 서비스는 판단을 memo에게 물어보면 된다.
+        - [ ] Test 수정
+        - [ ] 에러는 responseStatusException 일단 들고 가자
 
 - [ ] 예외 처리
+    - [ ] Memo에 적용
+    - [ ] Member에 적용
     - [ ] 에러 응답 DTO
-    - [ ] 앞서 미뤄둔 service 계층 도입
-    - [ ] 앞서 미뤄둔 테스트 수정
     - [ ] MemberController 에서 비밀번호 에러 처리 구분 - code 필드로 바꾸자
     - [ ] getById
     - [ ] 401 응답 형식 통일 (인터셉터는 빈 본문, 컨트롤러 예외는 에러 JSON)
@@ -72,10 +78,9 @@ MVC2 편 내용을 적용
 - DB/ JPA
 - 배포 인증 인가 -> 스프링 시큐리티
 - dto 중 password 해싱은 추후 spring-security-crypto 의 BCryptPasswordEncoder 사용하기
+- spring rest docs 도 있다는데 일단 구현에 집중하자
 
 ## 3. 구조
-
-컨트롤러 -> 리포지토리
 
 ## 4. API
 
@@ -112,10 +117,6 @@ MVC2 편 내용을 적용
 ### 지금 상태 체크리스트
 
 TBD.
-
-#### 보류: 설계를 먼저 정할 것
-
-- [ ] 없는 id로 조회/수정하면 어떻게 할지 (지금 Memo 쪽은 처리 코드가 없음). 404로 정하고 예외 처리를 만든 뒤에 테스트.
 
 #### 컨트롤러 테스트에서 하지 않는 것
 
