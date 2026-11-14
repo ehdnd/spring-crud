@@ -1,12 +1,12 @@
 package io.github.ehdnd.crud.web.memo;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -17,7 +17,7 @@ import io.github.ehdnd.crud.domain.memo.MemoRepository;
 import io.github.ehdnd.crud.web.SessionConst;
 import java.util.Optional;
 import java.util.stream.Stream;
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -55,21 +55,51 @@ class MemoControllerTest {
   @Test
   void memo() throws Exception {
     // 내 메모를 조회하면 200 + 정상 응답
+    Memo memo = memo(1L, "title", "content", 1L);
+    given(memoRepository.findById(1L)).willReturn(Optional.of(memo));
+
+    getMemo(1L, loginSession(1L))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.title").value("title"))
+        .andExpect(jsonPath("$.content").value("content"));
   }
 
   @Test
-  void memo_notFond() throws Exception {
+  void memo_notFound() throws Exception {
     // 없는 memoId 조회하면 404
+    given(memoRepository.findById(1L)).willReturn(Optional.empty());
+
+    getMemo(1L, loginSession(1L))
+        .andExpect(status().isNotFound());
   }
 
   @Test
   void memo_notMyMemo() throws Exception {
     // 남의 메모면 404
+    // 없는 memoId 조회하면 404
+    Memo memo = memo(1L, "title", "content", 1L);
+    given(memoRepository.findById(1L)).willReturn(Optional.of(memo));
+
+    getMemo(1L, loginSession(2L))
+        .andExpect(status().isNotFound());
   }
 
   @Test
+  @Disabled("TODO")
   void memos() throws Exception {
     // 두 회원이 메모 모두 조회 시 자신의 메모만 제공
+    Memo memo1 = memo(1L, "title", "content", 1L);
+    Memo memo2 = memo(2L, "title", "content", 2L);
+
+    given(memoRepository.findById(1L)).willReturn(Optional.of(memo1));
+    given(memoRepository.findById(2L)).willReturn(Optional.of(memo2));
+
+    getMemos(loginSession(1L))
+        .andExpect(status().isOk());
+
+    getMemos(loginSession(2L))
+        .andExpect(status().isOk());
   }
 
   @Test
@@ -158,7 +188,7 @@ class MemoControllerTest {
   }
 
   @Test
-  void edit_invalidId() throws Exception {
+  void edit_notFound() throws Exception {
     // given
     given(memoRepository.findById(1L)).willReturn(Optional.empty());
 
@@ -179,6 +209,18 @@ class MemoControllerTest {
   }
 
   // === HELPERS ===
+
+  private ResultActions getMemo(Long memoId, MockHttpSession session)
+      throws Exception {
+    return mockMvc.perform(get("/memos/" + memoId)
+        .session(session));
+  }
+
+  private ResultActions getMemos(MockHttpSession session)
+      throws Exception {
+    return mockMvc.perform(get("/memos")
+        .session(session));
+  }
 
   private ResultActions postMemo(String title, String content, MockHttpSession session)
       throws Exception {
