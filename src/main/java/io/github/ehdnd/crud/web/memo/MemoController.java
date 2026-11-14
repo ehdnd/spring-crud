@@ -1,7 +1,5 @@
 package io.github.ehdnd.crud.web.memo;
 
-import io.github.ehdnd.crud.domain.memo.Memo;
-import io.github.ehdnd.crud.domain.memo.MemoRepository;
 import io.github.ehdnd.crud.domain.memo.MemoService;
 import io.github.ehdnd.crud.web.login.Login;
 import io.github.ehdnd.crud.web.memo.dto.MemoResponse;
@@ -9,7 +7,6 @@ import io.github.ehdnd.crud.web.memo.dto.MemoSaveRequest;
 import io.github.ehdnd.crud.web.memo.dto.MemoUpdateRequest;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,14 +15,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/memos")
 @RequiredArgsConstructor
 public class MemoController {
 
-  private final MemoRepository memoRepository;
   private final MemoService memoService;
 
   @GetMapping
@@ -43,8 +38,8 @@ public class MemoController {
   @PostMapping
   MemoResponse add(@Login Long memberId, @Validated @RequestBody MemoSaveRequest memoSaveRequest) {
 
-    Memo memo = new Memo(memoSaveRequest.title(), memoSaveRequest.content(), memberId);
-    return MemoResponse.from(memoRepository.save(memo));
+    return MemoResponse.from(
+        memoService.addMemo(memoSaveRequest.title(), memoSaveRequest.content(), memberId));
   }
 
 
@@ -53,10 +48,7 @@ public class MemoController {
   MemoResponse edit(@Login Long memberId, @PathVariable Long memoId,
       @Validated @RequestBody MemoUpdateRequest memoUpdateRequest) {
 
-    Memo memo = memoRepository.findById(memoId).filter(m -> memberId.equals(m.getMemberId()))
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-    memo.update(memoUpdateRequest.title(), memoUpdateRequest.content());
-    return MemoResponse.from(memo);
+    return MemoResponse.from(memoService.updateMemo(memberId, memoId, memoUpdateRequest.title(),
+        memoUpdateRequest.content()));
   }
 }
