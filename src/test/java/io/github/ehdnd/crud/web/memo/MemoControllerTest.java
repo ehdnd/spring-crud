@@ -7,8 +7,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,7 +62,8 @@ class MemoControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.title").value("title"))
-        .andExpect(jsonPath("$.content").value("content"));
+        .andExpect(jsonPath("$.content").value("content"))
+        .andExpect(jsonPath("$.memberId").doesNotExist());
   }
 
   @Test
@@ -98,7 +99,8 @@ class MemoControllerTest {
         .andExpect(jsonPath("$.length()").value(1))
         .andExpect(jsonPath("$[0].id").value(1))
         .andExpect(jsonPath("$[0].title").value("title"))
-        .andExpect(jsonPath("$[0].content").value("content"));
+        .andExpect(jsonPath("$[0].content").value("content"))
+        .andExpect(jsonPath("$[0].memberId").doesNotExist());
   }
 
   @Test
@@ -111,7 +113,8 @@ class MemoControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.title").value("title"))
-        .andExpect(jsonPath("$.content").value("content"));
+        .andExpect(jsonPath("$.content").value("content"))
+        .andExpect(jsonPath("$.memberId").doesNotExist());
 
     ArgumentCaptor<Memo> captor = ArgumentCaptor.forClass(Memo.class);
     then(memoRepository).should().save(captor.capture());
@@ -158,7 +161,8 @@ class MemoControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.title").value("newTitle"))
-        .andExpect(jsonPath("$.content").value("newContent"));
+        .andExpect(jsonPath("$.content").value("newContent"))
+        .andExpect(jsonPath("$.memberId").doesNotExist());
 
     assertThat(memo.getTitle()).isEqualTo("newTitle");
     assertThat(memo.getContent()).isEqualTo("newContent");
