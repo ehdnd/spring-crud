@@ -34,6 +34,12 @@ public class MemoController {
     return memoService.findMemos(memberId).stream().map(MemoResponse::from).toList();
   }
 
+  @GetMapping("/{memoId}")
+  MemoResponse memo(@Login Long memberId, @PathVariable Long memoId) {
+    // 자신의 메모만 -> 남의 메모는 404 존재 숨김
+    return MemoResponse.from(memoService.getMemo(memberId, memoId));
+  }
+
   @PostMapping
   MemoResponse add(@Login Long memberId, @Validated @RequestBody MemoSaveRequest memoSaveRequest) {
 
@@ -41,11 +47,6 @@ public class MemoController {
     return MemoResponse.from(memoRepository.save(memo));
   }
 
-  @GetMapping("/{memoId}")
-  MemoResponse memo(@Login Long memberId, @PathVariable Long memoId) {
-    // 자신의 메모만 -> 남의 메모는 404 존재 숨김
-    return MemoResponse.from(memoService.getMemo(memberId, memoId));
-  }
 
   // TODO 추후 Patch 로 일부 필드만 수정 가능하게 또는 JsonNullable 등 도입해야.
   @PutMapping("/{memoId}")
