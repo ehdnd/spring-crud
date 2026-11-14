@@ -42,9 +42,9 @@ public class MemoController {
   @GetMapping("/{memoId}")
   MemoResponse memo(@Login Long memberId, @PathVariable Long memoId) {
     // 자신의 메모만 -> 남의 메모는 404 존재 숨김
-    return MemoResponse.from(
-        memoRepository.findById(memoId).filter(m -> memberId.equals(m.getMemberId()))
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
+    return memoRepository.findById(memoId).filter(m -> memberId.equals(m.getMemberId()))
+        .map(MemoResponse::from)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
   // TODO 또는 추후 Patch 로 일부 필드만 수정 가능하게 또는 JsonNullable 등 도입해야.
