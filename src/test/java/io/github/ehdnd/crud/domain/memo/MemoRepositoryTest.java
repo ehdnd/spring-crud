@@ -26,4 +26,9 @@ class MemoRepositoryTest {
     Memo findMemo = memoRepository.findById(memo.getId()).orElse(null);
     assertThat(findMemo).isEqualTo(memo);
   }
+
+  @Test
+  void findByMemberId() {
+    // TODO 테스트 작성하기
+  }
 }

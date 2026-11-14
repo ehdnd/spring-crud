@@ -53,6 +53,26 @@ class MemoControllerTest {
   }
 
   @Test
+  void memo() throws Exception {
+    // 내 메모를 조회하면 200 + 정상 응답
+  }
+
+  @Test
+  void memo_notFond() throws Exception {
+    // 없는 memoId 조회하면 404
+  }
+
+  @Test
+  void memo_notMyMemo() throws Exception {
+    // 남의 메모면 404
+  }
+
+  @Test
+  void memos() throws Exception {
+    // 두 회원이 메모 모두 조회 시 자신의 메모만 제공
+  }
+
+  @Test
   void add() throws Exception {
     // given
     given(memoRepository.save(any(Memo.class))).willReturn(memo(1L, "title", "content", 1L));
@@ -155,7 +175,7 @@ class MemoControllerTest {
 
     // when, then
     patchMemo(1L, "title", "content", loginSession(2L))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isNotFound());
   }
 
   // === HELPERS ===
