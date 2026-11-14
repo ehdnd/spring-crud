@@ -2,6 +2,7 @@ package io.github.ehdnd.crud.web.memo;
 
 import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoRepository;
+import io.github.ehdnd.crud.domain.memo.MemoService;
 import io.github.ehdnd.crud.web.login.Login;
 import io.github.ehdnd.crud.web.memo.dto.MemoResponse;
 import io.github.ehdnd.crud.web.memo.dto.MemoSaveRequest;
@@ -25,11 +26,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class MemoController {
 
   private final MemoRepository memoRepository;
+  private final MemoService memoService;
 
   @GetMapping
   List<MemoResponse> memos(@Login Long memberId) {
     // 인터셉터가 이미 로그인 사용자 확인함 -> memberId 가 있다.
-    return memoRepository.findByMemberId(memberId).stream().map(MemoResponse::from).toList();
+    return memoService.findMemos(memberId).stream().map(MemoResponse::from).toList();
   }
 
   @PostMapping
@@ -42,9 +44,7 @@ public class MemoController {
   @GetMapping("/{memoId}")
   MemoResponse memo(@Login Long memberId, @PathVariable Long memoId) {
     // 자신의 메모만 -> 남의 메모는 404 존재 숨김
-    return memoRepository.findById(memoId).filter(m -> memberId.equals(m.getMemberId()))
-        .map(MemoResponse::from)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    return MemoResponse.from(memoService.getMemo(memberId, memoId));
   }
 
   // TODO 추후 Patch 로 일부 필드만 수정 가능하게 또는 JsonNullable 등 도입해야.
