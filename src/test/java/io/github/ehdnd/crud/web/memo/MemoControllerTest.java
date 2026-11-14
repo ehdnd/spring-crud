@@ -204,8 +204,10 @@ class MemoControllerTest {
     given(memoRepository.findById(1L)).willReturn(Optional.of(memo));
 
     // when, then
-    patchMemo(1L, "title", "content", loginSession(2L))
+    patchMemo(1L, "newTitle", "newContent", loginSession(2L))
         .andExpect(status().isNotFound());
+
+    assertThat(memo.getTitle()).isEqualTo("title");
   }
 
   // === HELPERS ===
