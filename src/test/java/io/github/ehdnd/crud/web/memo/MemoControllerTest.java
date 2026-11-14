@@ -77,8 +77,6 @@ class MemoControllerTest {
 
   @Test
   void memo_notMyMemo() throws Exception {
-    // 남의 메모면 404
-    // 없는 memoId 조회하면 404
     Memo memo = memo(1L, "title", "content", 1L);
     given(memoRepository.findById(1L)).willReturn(Optional.of(memo));
 
