@@ -22,6 +22,9 @@ public class Memo {
   @Setter(AccessLevel.PACKAGE)
   private LocalDateTime updatedAt;
 
+  public static final int TITLE_MAX_LENGTH = 20;
+  public static final int CONTENT_MAX_LENGTH = 1000;
+
   public Memo(String title, String content, Long memberId) {
     this.title = title;
     this.content = content;
