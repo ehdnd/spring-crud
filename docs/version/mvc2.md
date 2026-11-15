@@ -41,7 +41,7 @@ MVC2 편 내용을 적용
         - [X] 현재 엔드포인트 별로 로그인 여부 결정 → [4. API](#4-api)
         - [X] `PATCH /members/{id}/password` → `PATCH /members/me/password`
     - [X] 세션
-    - [X] (CURRENT) 메모가 memberId 를 가지자
+    - [X] 메모가 memberId 를 가지자
         - [X] MemoResponse DTO 생성
         - [X] 작성자는 Login 에서 꺼내쓰는 값이다.
         - [X] Setter 막아둘 곳 막아두기
@@ -54,20 +54,33 @@ MVC2 편 내용을 적용
         - [X] 메모의 멤버 아이디 노출 여부 결정. 안보이고 추후에 멤버 닉네임 도입 시 적용.
     - [X] 아이디 중복 체크 -> MemberService 추가
     - [ ] 메모 삭제 delete 추가 - 일단 뒤로 미룸
-    - [ ] MemoService 추가
-        - [ ] memo.isOwnedBy 추가
-        - [ ] 찾기, 주인확인, 수정, 저장 옮기기
-        - [ ] memo.isOwnedBy - 서비스는 판단을 memo에게 물어보면 된다.
-        - [ ] Test 수정
-        - [ ] 에러는 responseStatusException 일단 들고 가자
+    - [ ] (CURRENT) MemoService 추가
+        - [X] 찾기, 주인확인, 수정, 저장 옮기기
+        - [X] memo.isOwnedBy - 서비스는 판단을 memo에게 물어보면 된다.
+        - [X] Test 수정
+            - [X] 컨트롤러에 서비스 Mock 도입
+            - [X] 서비스 테스트 추가
+            - [X] MemoTest 추가 - 의존하는데 테스트가 없다.
+        - [ ] POST 가 200을 반환한다 -> 201 반환으로 수정
+    - [ ] MemberServiceTest 추가 밎 수정 진행
 
 - [ ] 예외 처리
-    - [ ] Memo에 적용
-    - [ ] Member에 적용
-    - [ ] 에러 응답 DTO
-    - [ ] MemberController 에서 비밀번호 에러 처리 구분 - code 필드로 바꾸자
-    - [ ] getById
-    - [ ] 401 응답 형식 통일 (인터셉터는 빈 본문, 컨트롤러 예외는 에러 JSON)
+    - [X] Memo에 먼저 적용 - MEMO_NOT_FOUND 끝
+    - [ ] Member에 추후 적용
+        - [ ] MemberController 에서 비밀번호 에러 처리 구분 - PASSWORD_MISMATCH, INVALID_INPUT
+    - [X] 에러 응답 DTO - ProblemDetail 사용하기
+    - [ ] (NEXT) 401 Unauthorized 응답 형식 통일 (인터셉터는 빈 본문, 컨트롤러 예외는 에러 JSON)
+        - [ ] 로그인 안함 - 인터셉터 setStatus(401) -> BusinessException 던지기
+        - [ ] 아이디, 비번 틀림 - 로그인 컨트롤러 ResponseStatusException
+            - -> code 수정, detail 추가 - LOGIN_FAILED(401) 아이디 또는 비밀번호가 올바르지 않습니다.
+        - [ ] 세션 있는데 회원 없음 - 로그인 컨트롤러 ResponseStatusException
+            - -> code 수정, detail 추가 - UNAUTHORIZED(401) 로그인이 필요합니다.
+    - [ ] 핸들러가 잡을것
+        - [X] BusinessException - 내 코드
+        - [X] MethodArgumentNotValidException (검증실패) - 스프링
+            - [X] 본문에 어떤 필드가 틀렸는지 넣어야함
+        - [ ] Exception (나머지 전부) - 버그, 장애
+        - [X] 나머지 스프링 표준 예외는 `handleExceptionInternal`에서 code 만 붙임
 
 - [ ] 타입 컨버터 JSON ?
 
@@ -133,3 +146,29 @@ TBD.
 | GET 테스트                       | 있음 (`members`, `member`)                                              | 없음                                                                       |
 
 - [ ] Memo도 Member 방식으로 맞출지 결정
+
+## 에러 관련 정리
+
+요청
+│ ① 인터셉터 (로그인 확인)      → 401. 예외가 아니라 setStatus 라서 핸들러를 안 탐
+│ ② 스프링이 요청을 해석 → 스프링 예외 (내 코드에 도달하기 전에 실패)
+│ ③ 내 코드 (컨트롤러→서비스)    → BusinessException (내가 의도한 거절)
+│ → 그 외 예외 (의도하지 않은 버그·장애)
+▼
+GlobalExceptionHandler : 예외 → ProblemDetail(JSON)
+
+1. 경로/메서드 찾기 - 없는 경로 -> HttpRequestMethodNotSupportedException, NoResourceFoundException
+2. 본문 형식 확인 - 다른 타입 -> HttpMediaTypeNotSupportedException
+3. JSON 객체 바인딩 - 실패 -> HttpMessageNotReadableException
+4. 경로 변수 반환 - 다른 경로 -> MethodArgumentTypeMismatchException
+5. 객체 검증 - 빈 문자열 -> MethodArgumentNotValidException : 부모가 처리하는데 errors 없다
+
+---
+
+status: ErrorCode.status - 404
+title: 스프링이 자동으로 status 보고 (상태 코드 짧은 이름)
+detail: 실패에 대한 사람용 설명 - 내가 ErrorCode.message
+instance: 실패 요청 경로 - 스프링이 자동으로
+type: 문제 종류를 가리키는 URI - 안채움
+code: 클라이언트가 분기할 식별자 (확장필드) - setProperty로
+errors: 필드별 검증 오류 목록 (확장필드) - 내가 
