@@ -123,8 +123,23 @@ class MemoControllerTest {
     postMemo(title, content, loginSession(10L))
         .andExpect(status().isBadRequest());
 
-    // TODO 검증 실패 응답 포맷확정 후 대표 케이스 1개 추가 (JSON 포멧 검증)
     then(memoService).shouldHaveNoInteractions();
+  }
+
+  // 핸들러 테스트임 -> 추후에 global 로 옮기자.
+  @Test
+  void add_invalid_errorBody() throws Exception {
+    // 검증 실패 응답 포맷은 이 대표 케이스 하나에서만 확인 (나머지 invalid 케이스는 상태 코드만)
+    // message 문구는 로케일에 따라 달라지므로 값이 아니라 존재만 확인
+    postMemo(" ", "content", loginSession(10L))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpect(jsonPath("$.status").value(400))
+        .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
+        .andExpect(jsonPath("$.detail").exists())
+        .andExpect(jsonPath("$.errors.length()").value(1))
+        .andExpect(jsonPath("$.errors[0].field").value("title"))
+        .andExpect(jsonPath("$.errors[0].message").isNotEmpty());
   }
 
   @Test
