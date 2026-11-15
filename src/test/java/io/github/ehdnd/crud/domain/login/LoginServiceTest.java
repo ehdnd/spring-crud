@@ -11,4 +11,10 @@ class LoginServiceTest {
   void login() {
     // 없는 아이디, 틀린 비밀번호 -> LOGIN_FAILED 주는지
   }
+
+  @Test
+  @Disabled("TODO")
+  void me() {
+    
+  }
 }
