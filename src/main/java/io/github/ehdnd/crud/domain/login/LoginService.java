@@ -20,4 +20,9 @@ public class LoginService {
         .filter(m -> m.matchesPassword(password))
         .orElseThrow(() -> new BusinessException(ErrorCode.LOGIN_FAILED));
   }
+
+  public Member me(Long memberId) {
+    return memberRepository.findById(memberId)
+        .orElseThrow(() -> new BusinessException(ErrorCode.UNAUTHORIZED));
+  }
 }
