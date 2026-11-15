@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import io.github.ehdnd.crud.domain.login.LoginService;
 import io.github.ehdnd.crud.domain.member.MemberRepository;
+import io.github.ehdnd.crud.global.error.BusinessException;
+import io.github.ehdnd.crud.global.error.ErrorCode;
 import io.github.ehdnd.crud.web.SessionConst;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -41,7 +43,7 @@ class LoginControllerTest {
 
     // 테스트 대상이 직접 호출하는 것만 stub
     given(loginService.login("loginId", "password"))
-        .willReturn(Optional.of(createMember(1L, "loginId", "password")));
+        .willReturn(createMember(1L, "loginId", "password"));
 
     // when, then
     postLogin("loginId", "password", new MockHttpSession())
@@ -60,7 +62,7 @@ class LoginControllerTest {
     String beforeId = session.getId();
 
     given(loginService.login("loginId", "password"))
-        .willReturn(Optional.of(createMember(1L, "loginId", "password")));
+        .willReturn(createMember(1L, "loginId", "password"));
 
     // when
     postLogin("loginId", "password", session)
@@ -75,19 +77,22 @@ class LoginControllerTest {
   @Test
   void login_fail() throws Exception {
     // given
-    given(loginService.login("loginId", "wrong")).willReturn(Optional.empty());
+    given(loginService.login("loginId", "wrong")).willThrow(
+        new BusinessException(ErrorCode.LOGIN_FAILED));
 
     // when, then
     postLogin("loginId", "wrong", new MockHttpSession())
         .andExpect(status().isUnauthorized())
-        .andExpect(request().sessionAttributeDoesNotExist(SessionConst.LOGIN_MEMBER_ID));
+        .andExpect(request().sessionAttributeDoesNotExist(SessionConst.LOGIN_MEMBER_ID))
+        .andExpect(jsonPath("$.code").value("LOGIN_FAILED"));
 
   }
 
   @Test
   void login_invalid() throws Exception {
     postLogin("", "password", new MockHttpSession())
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
 
     then(loginService).shouldHaveNoInteractions();
   }
@@ -109,7 +114,8 @@ class LoginControllerTest {
   @Test
   void me() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(Optional.of(createMember(1L, "loginId", "password")));
+    given(memberRepository.findById(1L)).willReturn(
+        Optional.of(createMember(1L, "loginId", "password")));
 
     // when, then
     getMe(loginSession(1L))
