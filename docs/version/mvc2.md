@@ -75,6 +75,7 @@ MVC2 편 내용을 적용
             - -> code 수정, detail 추가 - LOGIN_FAILED(401) 아이디 또는 비밀번호가 올바르지 않습니다.
         - [ ] 세션 있는데 회원 없음 - 로그인 컨트롤러 ResponseStatusException
             - -> code 수정, detail 추가 - UNAUTHORIZED(401) 로그인이 필요합니다.
+    - [ ] LoginServiceTest 작성
     - [ ] 핸들러가 잡을것
         - [X] BusinessException - 내 코드
         - [X] MethodArgumentNotValidException (검증실패) - 스프링
