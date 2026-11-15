@@ -31,8 +31,7 @@ public class LoginController {
   public MemberResponse login(@Validated @RequestBody LoginRequest loginRequest,
       HttpServletRequest request) {
 
-    Member member = loginService.login(loginRequest.loginId(), loginRequest.password())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    Member member = loginService.login(loginRequest.loginId(), loginRequest.password());
     log.info("login success member={}", member);
 
     HttpSession session = request.getSession();
