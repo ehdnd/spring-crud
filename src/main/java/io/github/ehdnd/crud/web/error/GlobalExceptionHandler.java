@@ -31,6 +31,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+  // [1] 비즈니스 예외
   @ExceptionHandler(BusinessException.class)
   ProblemDetail handleBusinessException(BusinessException e) {
 
@@ -43,11 +44,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return problemDetail;
   }
 
-  // bean validation `@Validated @RequestBody` -> 제약을 어김
+  // [3] 다른 모든 예상 못한 예외 -> 500
+  @ExceptionHandler(Exception.class)
+  ProblemDetail handleUnexpected(Exception e) {
+
+    log.error("Unexpected exception", e);
+
+    ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(errorCode.getStatus(),
+        errorCode.getMessage());
+    problemDetail.setProperty("code", errorCode.name());
+    return problemDetail;
+  }
+
+
+  // [2] bean validation `@Validated @RequestBody` -> 제약을 어김
   // -> MethodArgumentNotValidException 던짐
   // -> 부모 클래스 ResponseEntityExceptionHandler 잡아서 이거 호출
   // -> 이게 400 Bad Request 응답 본문 생성
-  // 어떤 필드가 왜 틀렸는지, code 구분, detail 한국어로 주자.
+  // 어떤 필드가 왜 틀렸는지, code 구분, 한국어 detail 넣는다.
   @Override
   protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status,
@@ -66,7 +81,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return handleExceptionInternal(ex, body, headers, status, request);
   }
 
-  // 부모가 처리하는 스프링 표준 예외는 전부 응답 직전에 이 메서드를 지남 -> 여기서 code 만 추가
+  // [4] 부모가 처리하는 스프링 표준 예외는 전부 응답 직전에 이 메서드를 지남 -> 여기서 code 없으면 추가
   @Override
   protected @Nullable ResponseEntity<Object> handleExceptionInternal(Exception ex,
       @Nullable Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
