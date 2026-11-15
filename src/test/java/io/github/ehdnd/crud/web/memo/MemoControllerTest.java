@@ -123,8 +123,7 @@ class MemoControllerTest {
     postMemo(title, content, loginSession(10L))
         .andExpect(status().isBadRequest());
 
-    // 이거랑 에러코드같은것도 검증해야하나? 던져주는 json 포멧 검증해야하나?
-    // -> 추후 확정되면 대표 케이스 하나 만들자. 포멧 검증은 한 곳에서만.
+    // TODO 검증 실패 응답 포맷확정 후 대표 케이스 1개 추가 (JSON 포멧 검증)
     then(memoService).shouldHaveNoInteractions();
   }
 
@@ -172,7 +171,6 @@ class MemoControllerTest {
 
     then(memoService).shouldHaveNoInteractions();
   }
-
 
   @Test
   void edit_maxLength() throws Exception {
