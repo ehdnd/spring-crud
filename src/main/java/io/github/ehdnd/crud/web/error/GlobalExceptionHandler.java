@@ -1,7 +1,8 @@
-package io.github.ehdnd.crud.web;
+package io.github.ehdnd.crud.web.error;
 
 import io.github.ehdnd.crud.global.error.BusinessException;
 import io.github.ehdnd.crud.global.error.ErrorCode;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
@@ -42,14 +43,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return problemDetail;
   }
 
-  // bean validation 실패
+  // bean validation `@Validated @RequestBody` -> 제약을 어김
+  // -> MethodArgumentNotValidException 던짐
+  // -> 부모 클래스 ResponseEntityExceptionHandler 잡아서 이거 호출
+  // -> 이게 400 Bad Request 응답 본문 생성
+  // 어떤 필드가 왜 틀렸는지, code 구분, detail 한국어로 주자.
   @Override
   protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status,
       WebRequest request) {
 
-    // TODO 오버라이드 - 검증 실패 - INVALID_INPUT, errors 추가
-    return super.handleMethodArgumentNotValid(ex, headers, status, request);
+    ErrorCode errorCode = ErrorCode.INVALID_INPUT;
+    List<FieldErrorResponse> errors = ex.getBindingResult().getFieldErrors().stream()
+        .map(FieldErrorResponse::from).toList();
+
+    ProblemDetail body = ProblemDetail.forStatusAndDetail(errorCode.getStatus(),
+        errorCode.getMessage());
+    body.setProperty("code", errorCode.name());
+    body.setProperty("errors", errors);
+    // 거부된 값은 넣지 않음 (password 들어간다)
+
+    return handleExceptionInternal(ex, body, headers, status, request);
   }
 
   // 부모가 처리하는 스프링 표준 예외는 전부 응답 직전에 이 메서드를 지남 -> 여기서 code 만 추가
@@ -60,8 +74,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ResponseEntity<Object> response = super.handleExceptionInternal(ex, body, headers,
         statusCode, request);
 
-    if (response != null && response.getBody() instanceof ProblemDetail problemDetail) {
-      problemDetail.setProperty("code", HttpStatus.valueOf(statusCode.value()).name());
+    if (response != null && response.getBody() instanceof ProblemDetail pd && (
+        pd.getProperties() == null || !pd.getProperties().containsKey("code"))) {
+      pd.setProperty("code", HttpStatus.valueOf(statusCode.value()).name());
     }
     return response;
   }
