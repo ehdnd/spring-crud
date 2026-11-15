@@ -20,7 +20,7 @@ class LoginCheckInterceptorTest {
   MockHttpServletResponse response = new MockHttpServletResponse();
 
   @Test
-  void preHandle_noSession() throws Exception {
+  void preHandle_noSession() {
     // when, then
     assertThatThrownBy(() -> interceptor.preHandle(request, response, new Object())).isInstanceOf(
         BusinessException.class).extracting("errorCode").isEqualTo(ErrorCode.UNAUTHORIZED);
@@ -29,7 +29,7 @@ class LoginCheckInterceptorTest {
   }
 
   @Test
-  void preHandle_noLoginAttribute() throws Exception {
+  void preHandle_noLoginAttribute() {
     // given
     request.setSession(new MockHttpSession());
 
@@ -39,7 +39,7 @@ class LoginCheckInterceptorTest {
   }
 
   @Test
-  void preHandle_loggedIn() throws Exception {
+  void preHandle_loggedIn() {
     // given
     MockHttpSession session = new MockHttpSession();
     session.setAttribute(SessionConst.LOGIN_MEMBER_ID, 1L);

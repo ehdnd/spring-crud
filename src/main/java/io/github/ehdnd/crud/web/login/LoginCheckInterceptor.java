@@ -6,17 +6,16 @@ import io.github.ehdnd.crud.web.SessionConst;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-@Slf4j
 public class LoginCheckInterceptor implements HandlerInterceptor {
 
   // 인증을 담당 (인가가 아님)
 
   @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-      throws Exception {
+  public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response,
+      @NonNull Object handler) {
     HttpSession session = request.getSession(false);
     if (session == null || session.getAttribute(SessionConst.LOGIN_MEMBER_ID) == null) {
       throw new BusinessException(ErrorCode.UNAUTHORIZED);

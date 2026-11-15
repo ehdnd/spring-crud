@@ -4,6 +4,7 @@ import io.github.ehdnd.crud.global.error.BusinessException;
 import io.github.ehdnd.crud.global.error.ErrorCode;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -65,8 +66,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   // 어떤 필드가 왜 틀렸는지, code 구분, 한국어 detail 넣는다.
   @Override
   protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(
-      MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status,
-      WebRequest request) {
+      MethodArgumentNotValidException ex, @NonNull HttpHeaders headers,
+      @NonNull HttpStatusCode status,
+      @NonNull WebRequest request) {
 
     ErrorCode errorCode = ErrorCode.INVALID_INPUT;
     List<FieldErrorResponse> errors = ex.getBindingResult().getFieldErrors().stream()
@@ -83,8 +85,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
   // [4] 부모가 처리하는 스프링 표준 예외는 전부 응답 직전에 이 메서드를 지남 -> 여기서 code 없으면 추가
   @Override
-  protected @Nullable ResponseEntity<Object> handleExceptionInternal(Exception ex,
-      @Nullable Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
+  protected @Nullable ResponseEntity<Object> handleExceptionInternal(@NonNull Exception ex,
+      @Nullable Object body, @NonNull HttpHeaders headers, @NonNull HttpStatusCode statusCode,
+      @NonNull WebRequest request) {
 
     ResponseEntity<Object> response = super.handleExceptionInternal(ex, body, headers,
         statusCode, request);
