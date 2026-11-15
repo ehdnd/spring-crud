@@ -28,7 +28,7 @@ public class MemoService {
 
   public Memo updateMemo(Long memberId, Long memoId, String title, String content) {
 
-    Memo memo = getMemo(memoId, memberId);
+    Memo memo = getMemo(memberId, memoId);
     memo.update(title, content);
     return memo;
   }
