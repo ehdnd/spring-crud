@@ -121,7 +121,8 @@ class MemoControllerTest {
   void add_invalid(String title, String content) throws Exception {
     // when, then
     postMemo(title, content, loginSession(10L))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
 
     then(memoService).shouldHaveNoInteractions();
   }
@@ -166,7 +167,8 @@ class MemoControllerTest {
   @MethodSource("invalidRequests")
   void edit_invalid(String title, String content) throws Exception {
     putMemo(1L, title, content, loginSession(10L))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
 
     then(memoService).shouldHaveNoInteractions();
   }
