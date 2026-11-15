@@ -2,7 +2,10 @@ package io.github.ehdnd.crud.web.login;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.github.ehdnd.crud.global.error.BusinessException;
+import io.github.ehdnd.crud.global.error.ErrorCode;
 import io.github.ehdnd.crud.web.SessionConst;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
@@ -18,12 +21,10 @@ class LoginCheckInterceptorTest {
 
   @Test
   void preHandle_noSession() throws Exception {
-    // when
-    boolean result = interceptor.preHandle(request, response, new Object());
+    // when, then
+    assertThatThrownBy(() -> interceptor.preHandle(request, response, new Object())).isInstanceOf(
+        BusinessException.class).extracting("errorCode").isEqualTo(ErrorCode.UNAUTHORIZED);
 
-    // then
-    assertThat(result).isFalse();
-    assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_UNAUTHORIZED);
     assertThat(request.getSession(false)).isNull();
   }
 
@@ -32,12 +33,9 @@ class LoginCheckInterceptorTest {
     // given
     request.setSession(new MockHttpSession());
 
-    // when
-    boolean result = interceptor.preHandle(request, response, new Object());
-
-    // then
-    assertThat(result).isFalse();
-    assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_UNAUTHORIZED);
+    // when, then
+    assertThatThrownBy(() -> interceptor.preHandle(request, response, new Object())).isInstanceOf(
+        BusinessException.class).extracting("errorCode").isEqualTo(ErrorCode.UNAUTHORIZED);
   }
 
   @Test
