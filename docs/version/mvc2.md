@@ -69,18 +69,19 @@ MVC2 편 내용을 적용
     - [ ] Member에 추후 적용
         - [ ] MemberController 에서 비밀번호 에러 처리 구분 - PASSWORD_MISMATCH, INVALID_INPUT
     - [X] 에러 응답 DTO - ProblemDetail 사용하기
-    - [ ] (NEXT) 401 Unauthorized 응답 형식 통일 (인터셉터는 빈 본문, 컨트롤러 예외는 에러 JSON)
-        - [ ] 로그인 안함 - 인터셉터 setStatus(401) -> BusinessException 던지기
-        - [ ] 아이디, 비번 틀림 - 로그인 컨트롤러 ResponseStatusException
+    - [X] 401 Unauthorized 응답 형식 통일 (인터셉터는 빈 본문, 컨트롤러 예외는 에러 JSON)
+        - [X] 로그인 안함 - 인터셉터 setStatus(401) -> BusinessException 던지기
+        - [X] 아이디, 비번 틀림 - 로그인 컨트롤러 ResponseStatusException
             - -> code 수정, detail 추가 - LOGIN_FAILED(401) 아이디 또는 비밀번호가 올바르지 않습니다.
-        - [ ] 세션 있는데 회원 없음 - 로그인 컨트롤러 ResponseStatusException
+        - [X] 세션 있는데 회원 없음 - 로그인 컨트롤러 ResponseStatusException
             - -> code 수정, detail 추가 - UNAUTHORIZED(401) 로그인이 필요합니다.
-    - [ ] LoginServiceTest 작성
-    - [ ] 핸들러가 잡을것
+    - [ ] LoginControllerTest 수정
+    - [ ] (NEXT) LoginServiceTest 작성
+    - [X] 핸들러가 잡을것
         - [X] BusinessException - 내 코드
         - [X] MethodArgumentNotValidException (검증실패) - 스프링
             - [X] 본문에 어떤 필드가 틀렸는지 넣어야함
-        - [ ] Exception (나머지 전부) - 버그, 장애
+        - [X] Exception (나머지 전부) - 버그, 장애
         - [X] 나머지 스프링 표준 예외는 `handleExceptionInternal`에서 code 만 붙임
 
 - [ ] 타입 컨버터 JSON ?
@@ -118,10 +119,6 @@ MVC2 편 내용을 적용
 
 #### 구현 메모 (일부)
 
-- `excludePathPatterns` HTTP 메서드 구분 불가 → URL 설계(`/me/...`)로 회피
-- 401(Unauthorized 인증 실패) 2군데
-    - 로그인 X: 인터셉터 (`setStatus(401)` + `return false`, 본문 없음)
-    - 세션 O 회원 X (stale session): 컨트롤러 (`ResponseStatusException`)
 - `@Login Long memberId`
     - 로그인 안 했으면 null (로그인은 선택)
     - 인터셉터 걸린 경로는 null 아님 보장 → 컨트롤러 null 체크 X
@@ -151,7 +148,7 @@ TBD.
 ## 에러 관련 정리
 
 요청
-│ ① 인터셉터 (로그인 확인)      → 401. 예외가 아니라 setStatus 라서 핸들러를 안 탐
+│ ① 인터셉터 (로그인 확인)      → 401. 예외가 아니라 setStatus 라서 핸들러를 안 탐 -> 이제 예외라서 핸들러 탄다
 │ ② 스프링이 요청을 해석 → 스프링 예외 (내 코드에 도달하기 전에 실패)
 │ ③ 내 코드 (컨트롤러→서비스)    → BusinessException (내가 의도한 거절)
 │ → 그 외 예외 (의도하지 않은 버그·장애)
