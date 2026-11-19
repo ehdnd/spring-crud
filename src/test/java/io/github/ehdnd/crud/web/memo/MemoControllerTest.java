@@ -16,8 +16,6 @@ import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoService;
 import io.github.ehdnd.crud.global.error.BusinessException;
 import io.github.ehdnd.crud.global.error.ErrorCode;
-import io.github.ehdnd.crud.support.MemoFixture;
-import io.github.ehdnd.crud.web.SessionConst;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
@@ -147,7 +145,8 @@ class MemoControllerTest {
   void add_notLoggedIn() throws Exception {
     // when, then
     postMemo("title", "content", new MockHttpSession())
-        .andExpect(status().isUnauthorized());
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
 
     then(memoService).shouldHaveNoInteractions();
   }

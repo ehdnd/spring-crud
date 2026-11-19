@@ -1,14 +1,10 @@
 package io.github.ehdnd.crud.domain.memo;
 
-import static io.github.ehdnd.crud.support.ErrorCodeAssertions.*;
+import static io.github.ehdnd.crud.support.ErrorCodeAssertions.assertErrorCode;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.github.ehdnd.crud.global.error.BusinessException;
 import io.github.ehdnd.crud.global.error.ErrorCode;
-import io.github.ehdnd.crud.support.ErrorCodeAssertions;
 import java.util.List;
-import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 
 class MemoServiceTest {

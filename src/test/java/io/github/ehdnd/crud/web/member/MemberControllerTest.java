@@ -18,7 +18,6 @@ import io.github.ehdnd.crud.domain.member.MemberRepository;
 import io.github.ehdnd.crud.domain.member.MemberService;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;

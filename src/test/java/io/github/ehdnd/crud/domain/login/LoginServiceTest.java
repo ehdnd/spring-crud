@@ -32,7 +32,7 @@ class LoginServiceTest {
     memberRepository.save(new Member("loginId", "password"));
 
     // when, then
-    assertErrorCode((() -> loginService.login("other", "password")), ErrorCode.LOGIN_FAILED);
+    assertErrorCode(() -> loginService.login("other", "password"), ErrorCode.LOGIN_FAILED);
   }
 
   @Test
@@ -59,6 +59,6 @@ class LoginServiceTest {
   @Test
   void me_memberNotFound() {
     // when, then
-    assertErrorCode((() -> loginService.me(1L)), ErrorCode.UNAUTHORIZED);
+    assertErrorCode(() -> loginService.me(1L), ErrorCode.UNAUTHORIZED);
   }
 }
