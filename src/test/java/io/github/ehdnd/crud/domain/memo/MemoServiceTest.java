@@ -18,7 +18,7 @@ class MemoServiceTest {
     // given
     Memo memo1 = memoRepository.save(new Memo("title1", "content1", 10L));
     Memo memo2 = memoRepository.save(new Memo("title2", "content2", 10L));
-    Memo memoA = memoRepository.save(new Memo("title", "content", 20L));
+    memoRepository.save(new Memo("title", "content", 20L));
 
     // when
     List<Memo> memos = memoService.findMemos(10L);
