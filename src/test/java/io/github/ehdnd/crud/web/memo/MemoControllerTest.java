@@ -1,6 +1,7 @@
 package io.github.ehdnd.crud.web.memo;
 
 import static io.github.ehdnd.crud.support.MemoFixture.createMemo;
+import static io.github.ehdnd.crud.support.TestSessions.loginSession;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -222,11 +223,5 @@ class MemoControllerTest {
         .content("""
             {"title": "%s", "content": "%s"}
             """.formatted(title, content)));
-  }
-
-  private static MockHttpSession loginSession(Long memberId) {
-    MockHttpSession session = new MockHttpSession();
-    session.setAttribute(SessionConst.LOGIN_MEMBER_ID, memberId);
-    return session;
   }
 }
