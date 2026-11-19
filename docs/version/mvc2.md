@@ -70,6 +70,12 @@ MVC2 편 내용을 적용
         - [ ] MemberController 에서 비밀번호 에러 처리 구분 - PASSWORD_MISMATCH, INVALID_INPUT
         - [ ] POST 가 200을 반환한다 -> 201 반환으로 수정
             - [ ] 응답 포멧은 어떤식으로 가져감? 에러는 잘 정제해서 보내는데 정상 응답은 그냥 객체 던져주기만 한다.
+            - [ ] location 헤더를 추가하는게 나은가
+        - [ ] 도메인 수정
+            - [ ] 에러코드, Member가 비밀번호 바꾸도록
+            - [ ] 어느쪽이든 변경은 객체 스스로가 하는게 맞다
+        - [ ] 서비스 - 예외 던지도록
+        - [ ] 컨트롤러 - 목 제거
     - [X] 에러 응답 DTO - ProblemDetail 사용하기
     - [X] 401 Unauthorized 응답 형식 통일 (인터셉터는 빈 본문, 컨트롤러 예외는 에러 JSON)
         - [X] 로그인 안함 - 인터셉터 setStatus(401) -> BusinessException 던지기
@@ -96,6 +102,7 @@ MVC2 편 내용을 적용
 - 배포 인증 인가 -> 스프링 시큐리티
 - dto 중 password 해싱은 추후 spring-security-crypto 의 BCryptPasswordEncoder 사용하기
 - spring rest docs 도 있다는데 일단 구현에 집중하자
+- 응답 포멧 - 리스트 - 페이징 나중에 도입하면 고민하자.
 
 ## 3. 구조
 
