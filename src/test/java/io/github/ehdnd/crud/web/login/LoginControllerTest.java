@@ -12,12 +12,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.ehdnd.crud.domain.login.LoginService;
-import io.github.ehdnd.crud.domain.member.MemberRepository;
 import io.github.ehdnd.crud.global.error.BusinessException;
 import io.github.ehdnd.crud.global.error.ErrorCode;
 import io.github.ehdnd.crud.web.SessionConst;
-import java.util.Optional;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -33,8 +30,6 @@ class LoginControllerTest {
   @Autowired
   MockMvc mockMvc;
 
-  @MockitoBean
-  MemberRepository memberRepository;
   @MockitoBean
   LoginService loginService;
 
@@ -113,11 +108,9 @@ class LoginControllerTest {
   }
 
   @Test
-  @Disabled("TODO - mock service")
   void me() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(
-        Optional.of(createMember(1L, "loginId", "password")));
+    given(loginService.me(1L)).willReturn(createMember(1L, "loginId", "password"));
 
     // when, then
     getMe(loginSession(1L))
@@ -129,24 +122,25 @@ class LoginControllerTest {
 
 
   @Test
-  @Disabled("TODO")
   void me_notLoggedIn() throws Exception {
     // when, then
     mockMvc.perform(get("/me"))
-        .andExpect(status().isUnauthorized());
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
 
-    then(memberRepository).shouldHaveNoInteractions();
+    then(loginService).shouldHaveNoInteractions();
   }
 
   @Test
-  @Disabled("TODO")
   void me_staleSession() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(Optional.empty());
+    given(loginService.me(1L)).willThrow(new BusinessException(ErrorCode.UNAUTHORIZED));
 
     // when, then
     getMe(loginSession(1L))
-        .andExpect(status().isUnauthorized());
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+
   }
 
   // === HELPERS ===
