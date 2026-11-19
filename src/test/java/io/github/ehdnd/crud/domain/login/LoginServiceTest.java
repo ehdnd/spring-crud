@@ -1,13 +1,11 @@
 package io.github.ehdnd.crud.domain.login;
 
+import static io.github.ehdnd.crud.support.ErrorCodeAssertions.assertErrorCode;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.ehdnd.crud.domain.member.Member;
 import io.github.ehdnd.crud.domain.member.MemberRepository;
-import io.github.ehdnd.crud.global.error.BusinessException;
 import io.github.ehdnd.crud.global.error.ErrorCode;
-import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 
 class LoginServiceTest {
@@ -34,7 +32,7 @@ class LoginServiceTest {
     memberRepository.save(new Member("loginId", "password"));
 
     // when, then
-    assertLoginErrorCode((() -> loginService.login("other", "password")), ErrorCode.LOGIN_FAILED);
+    assertErrorCode((() -> loginService.login("other", "password")), ErrorCode.LOGIN_FAILED);
   }
 
   @Test
@@ -43,7 +41,7 @@ class LoginServiceTest {
     memberRepository.save(new Member("loginId", "password"));
 
     // when, then
-    assertLoginErrorCode(() -> loginService.login("loginId", "wrong"), ErrorCode.LOGIN_FAILED);
+    assertErrorCode(() -> loginService.login("loginId", "wrong"), ErrorCode.LOGIN_FAILED);
   }
 
   @Test
@@ -61,12 +59,6 @@ class LoginServiceTest {
   @Test
   void me_memberNotFound() {
     // when, then
-    assertLoginErrorCode((() -> loginService.me(1L)), ErrorCode.UNAUTHORIZED);
-  }
-
-  // === HELPERS ===
-  private void assertLoginErrorCode(ThrowingCallable action, ErrorCode errorCode) {
-    assertThatThrownBy(action).isInstanceOf(BusinessException.class).extracting("errorCode")
-        .isEqualTo(errorCode);
+    assertErrorCode((() -> loginService.me(1L)), ErrorCode.UNAUTHORIZED);
   }
 }

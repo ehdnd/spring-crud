@@ -1,10 +1,12 @@
 package io.github.ehdnd.crud.domain.memo;
 
+import static io.github.ehdnd.crud.support.ErrorCodeAssertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.ehdnd.crud.global.error.BusinessException;
 import io.github.ehdnd.crud.global.error.ErrorCode;
+import io.github.ehdnd.crud.support.ErrorCodeAssertions;
 import java.util.List;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
@@ -44,7 +46,7 @@ class MemoServiceTest {
   @Test
   void getMemo_notFound() {
     // when, then
-    assertMemoNotFound(() -> memoService.getMemo(10L, 1L));
+    assertErrorCode(() -> memoService.getMemo(10L, 1L), ErrorCode.MEMO_NOT_FOUND);
   }
 
   @Test
@@ -53,7 +55,7 @@ class MemoServiceTest {
     Memo memo = memoRepository.save(new Memo("title", "content", 10L));
 
     // when, then
-    assertMemoNotFound(() -> memoService.getMemo(20L, memo.getId()));
+    assertErrorCode(() -> memoService.getMemo(20L, memo.getId()), ErrorCode.MEMO_NOT_FOUND);
   }
 
   @Test
@@ -89,7 +91,8 @@ class MemoServiceTest {
   @Test
   void updateMemo_notFound() {
 
-    assertMemoNotFound(() -> memoService.updateMemo(10L, 1L, "newTitle", "newContent"));
+    assertErrorCode(() -> memoService.updateMemo(10L, 1L, "newTitle", "newContent"),
+        ErrorCode.MEMO_NOT_FOUND);
   }
 
   @Test
@@ -98,18 +101,11 @@ class MemoServiceTest {
     Memo memo = memoRepository.save(new Memo("title", "content", 10L));
 
     // when, then
-    assertMemoNotFound(
-        () -> memoService.updateMemo(20L, memo.getId(), "newTitle", "newContent"));
+    assertErrorCode(
+        () -> memoService.updateMemo(20L, memo.getId(), "newTitle", "newContent"),
+        ErrorCode.MEMO_NOT_FOUND);
 
     assertThat(memo.getTitle()).isEqualTo("title");
     assertThat(memo.getContent()).isEqualTo("content");
-  }
-
-  // === HELPERS ===
-
-  private void assertMemoNotFound(ThrowingCallable action) {
-    assertThatThrownBy(action)
-        .isInstanceOf(BusinessException.class).extracting("errorCode")
-        .isEqualTo(ErrorCode.MEMO_NOT_FOUND);
   }
 }
