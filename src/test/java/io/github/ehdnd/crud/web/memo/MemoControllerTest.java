@@ -1,5 +1,6 @@
 package io.github.ehdnd.crud.web.memo;
 
+import static io.github.ehdnd.crud.support.MemoFixture.createMemo;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -14,6 +15,7 @@ import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoService;
 import io.github.ehdnd.crud.global.error.BusinessException;
 import io.github.ehdnd.crud.global.error.ErrorCode;
+import io.github.ehdnd.crud.support.MemoFixture;
 import io.github.ehdnd.crud.web.SessionConst;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,7 +59,7 @@ class MemoControllerTest {
   void memo() throws Exception {
     // 내 메모를 조회하면 200 + 정상 응답
     // given
-    Memo memo = memo(1L, "title", "content", 10L);
+    Memo memo = createMemo(1L, "title", "content", 10L);
     ReflectionTestUtils.setField(memo, "createdAt", LocalDateTime.of(2026, 11, 14, 10, 0, 0));
     ReflectionTestUtils.setField(memo, "updatedAt", LocalDateTime.of(2026, 11, 14, 11, 30, 0));
 
@@ -92,7 +94,7 @@ class MemoControllerTest {
     // 서비스가 준 목록은 JSON 배열로 변경
     // 리포지토리: 두 명의 메모가 섞여있을 때 한 회원의 메모만 돌려주는가 - `MemoRepositoryTest`
 
-    given(memoService.findMemos(10L)).willReturn(List.of(memo(1L, "title", "content", 10L)));
+    given(memoService.findMemos(10L)).willReturn(List.of(createMemo(1L, "title", "content", 10L)));
 
     getMemos(loginSession(10L))
         .andExpect(status().isOk())
@@ -106,11 +108,11 @@ class MemoControllerTest {
   void add() throws Exception {
     // given
     given(memoService.addMemo("title", "content", 10L)).willReturn(
-        memo(1L, "title", "content", 10L));
+        createMemo(1L, "title", "content", 10L));
 
     // when, then
     postMemo("title", "content", loginSession(10L))
-        .andExpect(status().isOk())
+        .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.title").value("title"))
         .andExpect(jsonPath("$.content").value("content"));
@@ -133,11 +135,11 @@ class MemoControllerTest {
     String maxTitle = "a".repeat(20);
     String maxContent = "a".repeat(1000);
     given(memoService.addMemo(maxTitle, maxContent, 10L))
-        .willReturn(memo(1L, maxTitle, maxContent, 10L));
+        .willReturn(createMemo(1L, maxTitle, maxContent, 10L));
 
     // when, then
     postMemo(maxTitle, maxContent, loginSession(10L))
-        .andExpect(status().isOk());
+        .andExpect(status().isCreated());
   }
 
   @Test
@@ -152,7 +154,7 @@ class MemoControllerTest {
   @Test
   void edit() throws Exception {
     // given
-    Memo memo = memo(1L, "newTitle", "newContent", 10L);
+    Memo memo = createMemo(1L, "newTitle", "newContent", 10L);
     given(memoService.updateMemo(10L, 1L, "newTitle", "newContent")).willReturn(memo);
 
     // when, then
@@ -178,7 +180,7 @@ class MemoControllerTest {
     // given
     String maxTitle = "a".repeat(20);
     String maxContent = "a".repeat(1000);
-    Memo memo = memo(1L, maxTitle, maxContent, 10L);
+    Memo memo = createMemo(1L, maxTitle, maxContent, 10L);
 
     given(memoService.updateMemo(10L, 1L, maxTitle, maxContent)).willReturn(memo);
 
@@ -226,11 +228,5 @@ class MemoControllerTest {
     MockHttpSession session = new MockHttpSession();
     session.setAttribute(SessionConst.LOGIN_MEMBER_ID, memberId);
     return session;
-  }
-
-  private static Memo memo(Long id, String title, String content, Long memberId) {
-    Memo memo = new Memo(title, content, memberId);
-    ReflectionTestUtils.setField(memo, "id", id);
-    return memo;
   }
 }
