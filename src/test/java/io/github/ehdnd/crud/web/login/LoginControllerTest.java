@@ -108,6 +108,13 @@ class LoginControllerTest {
   }
 
   @Test
+  void logout_noSession() throws Exception {
+    // 인터셉터를 타지 않는 경로다.
+    mockMvc.perform(post("/logout"))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
   void me() throws Exception {
     // given
     given(loginService.me(1L)).willReturn(createMember(1L, "loginId", "password"));
