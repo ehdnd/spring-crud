@@ -1,7 +1,7 @@
 # spring-mvc-2
 
 작성: 26-10-28
-업데이트: 26-11-14
+업데이트: 26-11-19
 커밋:
 진도: MVC-2 수강 이후 api 서버로 구현
 
@@ -54,7 +54,7 @@ MVC2 편 내용을 적용
         - [X] 메모의 멤버 아이디 노출 여부 결정. 안보이고 추후에 멤버 닉네임 도입 시 적용.
     - [X] 아이디 중복 체크 -> MemberService 추가
     - [ ] 메모 삭제 delete 추가 - 일단 뒤로 미룸
-    - [ ] (CURRENT) MemoService 추가
+    - [X] MemoService 추가
         - [X] 찾기, 주인확인, 수정, 저장 옮기기
         - [X] memo.isOwnedBy - 서비스는 판단을 memo에게 물어보면 된다.
         - [X] Test 수정
@@ -62,12 +62,14 @@ MVC2 편 내용을 적용
             - [X] 서비스 테스트 추가
             - [X] MemoTest 추가 - 의존하는데 테스트가 없다.
         - [ ] POST 가 200을 반환한다 -> 201 반환으로 수정
-    - [ ] MemberServiceTest 추가 밎 수정 진행
+    - [ ] (CURRENT) MemberServiceTest 추가 밎 수정 진행
 
 - [ ] 예외 처리
     - [X] Memo에 먼저 적용 - MEMO_NOT_FOUND 끝
-    - [ ] Member에 추후 적용
+    - [ ] (NEXT) Member에 추후 적용
         - [ ] MemberController 에서 비밀번호 에러 처리 구분 - PASSWORD_MISMATCH, INVALID_INPUT
+        - [ ] POST 가 200을 반환한다 -> 201 반환으로 수정
+            - [ ] 응답 포멧은 어떤식으로 가져감? 에러는 잘 정제해서 보내는데 정상 응답은 그냥 객체 던져주기만 한다.
     - [X] 에러 응답 DTO - ProblemDetail 사용하기
     - [X] 401 Unauthorized 응답 형식 통일 (인터셉터는 빈 본문, 컨트롤러 예외는 에러 JSON)
         - [X] 로그인 안함 - 인터셉터 setStatus(401) -> BusinessException 던지기
@@ -75,8 +77,8 @@ MVC2 편 내용을 적용
             - -> code 수정, detail 추가 - LOGIN_FAILED(401) 아이디 또는 비밀번호가 올바르지 않습니다.
         - [X] 세션 있는데 회원 없음 - 로그인 컨트롤러 ResponseStatusException
             - -> code 수정, detail 추가 - UNAUTHORIZED(401) 로그인이 필요합니다.
-    - [ ] LoginControllerTest 수정
-    - [ ] (NEXT) LoginServiceTest 작성
+    - [X] LoginControllerTest 수정
+    - [X] LoginServiceTest 작성
     - [X] 핸들러가 잡을것
         - [X] BusinessException - 내 코드
         - [X] MethodArgumentNotValidException (검증실패) - 스프링
@@ -86,11 +88,11 @@ MVC2 편 내용을 적용
 
 - [ ] 타입 컨버터 JSON ?
 
-- [ ] 파일 업로드
+- [ ] 파일 업로드 - API로 하나 보통?
 
 ### 2-2. non-goal
 
-- DB/ JPA
+- DB / JPA
 - 배포 인증 인가 -> 스프링 시큐리티
 - dto 중 password 해싱은 추후 spring-security-crypto 의 BCryptPasswordEncoder 사용하기
 - spring rest docs 도 있다는데 일단 구현에 집중하자
