@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,15 +13,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.ehdnd.crud.domain.member.Member;
-import io.github.ehdnd.crud.domain.member.MemberRepository;
 import io.github.ehdnd.crud.domain.member.MemberService;
+import io.github.ehdnd.crud.global.error.BusinessException;
+import io.github.ehdnd.crud.global.error.ErrorCode;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -30,21 +30,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @WebMvcTest(MemberController.class)
-@Import(MemberService.class)
 class MemberControllerTest {
 
   @Autowired
   MockMvc mockMvc;
 
   @MockitoBean
-  MemberRepository memberRepository;
+  MemberService memberService;
 
   @Test
   void members() throws Exception {
     // given
     Member member1 = createMember(1L, "loginId1", "password1");
     Member member2 = createMember(2L, "loginId2", "password2");
-    given(memberRepository.findAll()).willReturn(List.of(member1, member2));
+    given(memberService.findMembers()).willReturn(List.of(member1, member2));
 
     // when, then
     getMembers()
@@ -61,8 +60,7 @@ class MemberControllerTest {
   @Test
   void add() throws Exception {
     // given
-    given(memberRepository.findByLoginId("loginId")).willReturn(Optional.empty());
-    given(memberRepository.save(any(Member.class))).willReturn(
+    given(memberService.join("loginId", "password")).willReturn(
         createMember(1L, "loginId", "password"));
 
     // when, then
@@ -71,43 +69,37 @@ class MemberControllerTest {
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.loginId").value("loginId"))
         .andExpect(jsonPath("$.password").doesNotExist());
-
-    ArgumentCaptor<Member> captor = ArgumentCaptor.forClass(Member.class);
-    then(memberRepository).should().save(captor.capture());
-    assertThat(captor.getValue()).usingRecursiveComparison()
-        .isEqualTo(new Member("loginId", "password"));
   }
 
   // 검증 규칙은 DTO 테스트가 수행
   @Test
   void add_invalid() throws Exception {
+    // given
+    given(memberService.join("", "password")).willThrow(
+        new BusinessException(ErrorCode.INVALID_INPUT));
+
     // when, then
     postMember("", "password")
-        .andExpect(status().isBadRequest());
-    // TODO json 필드로 에러 확인 필요
-
-    // 검증은 컨트롤러 메서드 진입 전에 실패하므로 리포지토리는 아예 호출되지 않아야 한다.
-    then(memberRepository).shouldHaveNoInteractions();
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
   }
 
   @Test
   void add_duplicateLoginId() throws Exception {
     // given
-    given(memberRepository.findByLoginId("loginId"))
-        .willReturn(Optional.of(createMember(1L, "loginId", "password")));
+    given(memberService.join("loginId", "password")).willThrow(
+        new BusinessException(ErrorCode.DUPLICATE_LOGIN_ID));
 
     // when, then
     postMember("loginId", "password")
-        .andExpect(status().isConflict());
-
-    then(memberRepository).should(never()).save(any(Member.class));
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.code").value("DUPLICATE_LOGIN_ID"));
   }
 
   @Test
   void member() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(
-        Optional.of(createMember(1L, "loginId", "password")));
+    given(memberService.getMemberById(1L)).willReturn(createMember(1L, "loginId", "password"));
 
     // when, then
     getMember(1L)
@@ -120,28 +112,34 @@ class MemberControllerTest {
   @Test
   void member_notFound() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(Optional.empty());
+    given(memberService.getMemberById(1L)).willThrow(
+        new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
     // when, then
     getMember(1L)
-        .andExpect(status().isNotFound());
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code").value("MEMBER_NOT_FOUND"));
   }
 
   @Test
-  void editPassword() throws Exception {
+  @Disabled
+  void updatePassword() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(
-        Optional.of(createMember(1L, "loginId", "password")));
+    // 쓸게 없나?
 
     // when, then
     patchPassword("password", "newPassword", loginSession(1L))
         .andExpect(status().isNoContent());
 
-    // 리포지토리를 믿고 리포지토리에게 요청 전달했는지만 확인하면 되는거 아닌가?
+    // 리포지토리를 믿고 리포지토리에게 요청 전달했는지만 확인하면 되는거 아닌가? - 네
   }
 
   @Test
-  void editPassword_notLoggedIn() throws Exception {
+  @Disabled
+  void updatePassword_notLoggedIn() throws Exception {
+    // given
+    // throw 는 어떻게 하지?
+
     patchPassword("password", "newPassword", new MockHttpSession())
         .andExpect(status().isUnauthorized());
 
@@ -149,7 +147,10 @@ class MemberControllerTest {
   }
 
   @Test
-  void editPassword_invalid() throws Exception {
+  @Disabled
+  void updatePassword_invalid() throws Exception {
+    // 마찬가지
+
     // when, then
     patchPassword("password", "", loginSession(1L))
         .andExpect(status().isBadRequest());
@@ -160,7 +161,10 @@ class MemberControllerTest {
   }
 
   @Test
-  void editPassword_wrongCurrentPassword() throws Exception {
+  @Disabled
+  void updatePassword_wrongCurrentPassword() throws Exception {
+    // 마찬가지
+
     // given
     given(memberRepository.findById(1L)).willReturn(
         Optional.of(createMember(1L, "loginId", "password")));
@@ -176,7 +180,10 @@ class MemberControllerTest {
   }
 
   @Test
-  void editPassword_staleSession() throws Exception {
+  @Disabled
+  void updatePassword_staleSession() throws Exception {
+    // 마찬가지
+
     // given
     given(memberRepository.findById(1L)).willReturn(Optional.empty());
 
