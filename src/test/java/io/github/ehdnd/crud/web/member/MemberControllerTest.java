@@ -67,7 +67,7 @@ class MemberControllerTest {
 
     // when, then
     postMember("loginId", "password")
-        .andExpect(status().isOk())
+        .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.loginId").value("loginId"))
         .andExpect(jsonPath("$.password").doesNotExist());
