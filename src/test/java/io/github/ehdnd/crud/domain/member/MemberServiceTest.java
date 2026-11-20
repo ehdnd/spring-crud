@@ -31,7 +31,9 @@ class MemberServiceTest {
     memberRepository.save(new Member("loginId", "password"));
 
     // when, then
-    assertErrorCode(() -> memberService.join("loginId", "password"), ErrorCode.DUPLICATE_LOGIN_ID);
+    assertErrorCode(() -> memberService.join("loginId", "different"), ErrorCode.DUPLICATE_LOGIN_ID);
+
+    assertThat(memberRepository.findAll()).hasSize(1);
   }
 
   @Test
@@ -78,7 +80,7 @@ class MemberServiceTest {
   }
 
   @Test
-  void updatePassword_notOwner() {
+  void updatePassword_memberNotFound() {
     // when, then
     assertErrorCode(() -> memberService.updatePassword(1L, "old", "new"), ErrorCode.UNAUTHORIZED);
   }
