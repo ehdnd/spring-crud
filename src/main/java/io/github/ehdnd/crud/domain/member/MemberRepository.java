@@ -32,12 +32,6 @@ public class MemberRepository {
         .findFirst();
   }
 
-  public Member updatePassword(Long id, String newPassword) {
-    Member findMember = store.get(id);
-    findMember.setPassword(newPassword);
-    return findMember;
-  }
-
   public void clear() {
     store.clear();
   }

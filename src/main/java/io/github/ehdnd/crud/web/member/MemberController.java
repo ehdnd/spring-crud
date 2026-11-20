@@ -71,7 +71,7 @@ public class MemberController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다.");
     }
 
-    memberRepository.updatePassword(memberId, memberPasswordUpdateRequest.newPassword());
+    member.updatePassword(memberPasswordUpdateRequest.newPassword());
 
     // TODO 에러코드 만들기
     // 실무 표준: ErrorCode + BusinessException + @RestControllerAdvice

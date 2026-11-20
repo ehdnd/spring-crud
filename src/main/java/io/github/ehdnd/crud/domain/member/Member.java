@@ -26,6 +26,11 @@ public class Member {
     this.password = password;
   }
 
+  /// Member 스스로 password 수정
+  public void updatePassword(String newPassword) {
+    this.password = newPassword;
+  }
+
   public boolean matchesPassword(String password) {
     return this.password.equals(password);
   }

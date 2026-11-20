@@ -30,8 +30,4 @@ class MemberRepositoryTest {
   void findByLoginId() {
   }
 
-  @Test
-  void update() {
-  }
-
 }

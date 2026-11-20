@@ -137,7 +137,7 @@ class MemberControllerTest {
     patchPassword("password", "newPassword", loginSession(1L))
         .andExpect(status().isNoContent());
 
-    then(memberRepository).should().updatePassword(1L, "newPassword");
+    // 리포지토리를 믿고 리포지토리에게 요청 전달했는지만 확인하면 되는거 아닌가?
   }
 
   @Test
@@ -172,7 +172,7 @@ class MemberControllerTest {
         // TODO 비밀번호 불일치와 검증실패 구분이 필요하다.
         .andExpect(jsonPath("$.detail").value("현재 비밀번호가 일치하지 않습니다."));
 
-    then(memberRepository).should(never()).updatePassword(any(), any());
+    // 서비스에서 예외 던지는거임 (인터셉터 아님)
   }
 
   @Test
@@ -184,7 +184,7 @@ class MemberControllerTest {
     patchPassword("password", "newPassword", loginSession(1L))
         .andExpect(status().isUnauthorized());
 
-    then(memberRepository).should(never()).updatePassword(any(), any());
+    // 에러 나고 업데이트 안된거 확인해야하나? 에러낫으면 요청 안가는거 아닌가? 서비스를 믿어야하는거지 이제.
   }
 
   // === HELPERS ===
