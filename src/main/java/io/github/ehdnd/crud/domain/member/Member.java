@@ -12,9 +12,7 @@ public class Member {
   @Setter(AccessLevel.PACKAGE)
   private Long id;
 
-  @Setter
   private String loginId;
-  @Setter
   @ToString.Exclude
   private String password;
 
