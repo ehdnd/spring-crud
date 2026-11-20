@@ -22,6 +22,7 @@ public class MemberService {
     return memberRepository.save(new Member(loginId, password));
   }
 
+  // 서비스가 판단 없이 리포지토리에 넘기기만 한다 -> 쓸모없는 테스트 (비용 적으니 둬도 상관없긴하더라.)
   public List<Member> findMembers() {
     return memberRepository.findAll();
   }
