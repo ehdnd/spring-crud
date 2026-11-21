@@ -61,21 +61,22 @@ MVC2 편 내용을 적용
             - [X] 컨트롤러에 서비스 Mock 도입
             - [X] 서비스 테스트 추가
             - [X] MemoTest 추가 - 의존하는데 테스트가 없다.
-        - [ ] POST 가 200을 반환한다 -> 201 반환으로 수정
-    - [ ] (CURRENT) MemberServiceTest 추가 밎 수정 진행
+        - [X] POST 가 200을 반환한다 -> 201 반환으로 수정
+    - [X] MemberServiceTest 추가 및 수정 진행
 
-- [ ] 예외 처리
+- [X] 예외 처리
     - [X] Memo에 먼저 적용 - MEMO_NOT_FOUND 끝
-    - [ ] (NEXT) Member에 추후 적용
-        - [ ] MemberController 에서 비밀번호 에러 처리 구분 - PASSWORD_MISMATCH, INVALID_INPUT
-        - [ ] POST 가 200을 반환한다 -> 201 반환으로 수정
-            - [ ] 응답 포멧은 어떤식으로 가져감? 에러는 잘 정제해서 보내는데 정상 응답은 그냥 객체 던져주기만 한다.
-            - [ ] location 헤더를 추가하는게 나은가
-        - [ ] 도메인 수정
-            - [ ] 에러코드, Member가 비밀번호 바꾸도록
-            - [ ] 어느쪽이든 변경은 객체 스스로가 하는게 맞다
-        - [ ] 서비스 - 예외 던지도록
-        - [ ] 컨트롤러 - 목 제거
+    - [X] Member에 추후 적용
+        - [X] MemberController 에서 비밀번호 에러 처리 구분 - PASSWORD_MISMATCH, INVALID_INPUT
+        - [X] POST 가 200을 반환한다 -> 201 반환으로 수정
+            - [X] 응답 포멧은 어떤식으로 가져감? 에러는 정제, 정상응답은 DTO, 생성은 201 + Location
+            - [X] location 헤더를 추가
+        - [X] 도메인 수정
+            - [X] 에러코드
+            - [X] Member가 비밀번호 바꾸도록
+            - [X] 어느쪽이든 변경은 객체 스스로가 하는게 맞다
+        - [X] 서비스 - 예외 던지도록
+        - [X] 컨트롤러 - 목 제거
     - [X] 에러 응답 DTO - ProblemDetail 사용하기
     - [X] 401 Unauthorized 응답 형식 통일 (인터셉터는 빈 본문, 컨트롤러 예외는 에러 JSON)
         - [X] 로그인 안함 - 인터셉터 setStatus(401) -> BusinessException 던지기
@@ -92,6 +93,8 @@ MVC2 편 내용을 적용
         - [X] Exception (나머지 전부) - 버그, 장애
         - [X] 나머지 스프링 표준 예외는 `handleExceptionInternal`에서 code 만 붙임
 
+- [ ] Member 관련 테스트? 방식 Memo와 통일?
+
 - [ ] 타입 컨버터 JSON ?
 
 - [ ] 파일 업로드 - API로 하나 보통?
@@ -100,6 +103,7 @@ MVC2 편 내용을 적용
 
 - DB / JPA
 - 배포 인증 인가 -> 스프링 시큐리티
+- 프록시 뒤 배포 시 Location에 내부 주소가 나가기에 server.forward-headers-strategy 설정 필요
 - dto 중 password 해싱은 추후 spring-security-crypto 의 BCryptPasswordEncoder 사용하기
 - spring rest docs 도 있다는데 일단 구현에 집중하자
 - 응답 포멧 - 리스트 - 페이징 나중에 도입하면 고민하자.
@@ -137,22 +141,6 @@ MVC2 편 내용을 적용
 ### 지금 상태 체크리스트
 
 TBD.
-
-#### 컨트롤러 테스트에서 하지 않는 것
-
-- 실제로 저장/수정됐는지 → `MemoRepositoryTest`에서
-- 1L, 2L, 3L처럼 같은 코드를 지나가는 값을 여러 개 넣어보는 것
-
-### 부분 적용 / Member 와 Memo 가 서로 다른 것
-
-| 항목                             | Member                                                                  | Memo                                                                       |
-|----------------------------------|-------------------------------------------------------------------------|----------------------------------------------------------------------------|
-| Bean Validation 경계값 검증 위치 | DTO 테스트 (`MemberSaveRequestTest`, `MemberPasswordUpdateRequestTest`) | 컨트롤러 테스트 (`add_invalid`, `edit_invalid` 각 4케이스 + `*_maxLength`) |
-| 컨트롤러의 400 테스트            | 대표 1케이스 (`add_invalid`, `editPassword_invalid`)                    | 파라미터 테스트로 전부                                                     |
-| 없는 id → 404                    | 있음 (`member_notFound`)                                                | 없음 (보류 항목)                                                           |
-| GET 테스트                       | 있음 (`members`, `member`)                                              | 없음                                                                       |
-
-- [ ] Memo도 Member 방식으로 맞출지 결정
 
 ## 에러 관련 정리
 
