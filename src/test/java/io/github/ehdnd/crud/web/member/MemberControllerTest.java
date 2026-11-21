@@ -2,10 +2,9 @@ package io.github.ehdnd.crud.web.member;
 
 import static io.github.ehdnd.crud.support.MemberFixture.createMember;
 import static io.github.ehdnd.crud.support.TestSessions.loginSession;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -17,10 +16,7 @@ import io.github.ehdnd.crud.domain.member.MemberService;
 import io.github.ehdnd.crud.global.error.BusinessException;
 import io.github.ehdnd.crud.global.error.ErrorCode;
 import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -74,14 +70,13 @@ class MemberControllerTest {
   // 검증 규칙은 DTO 테스트가 수행
   @Test
   void add_invalid() throws Exception {
-    // given
-    given(memberService.join("", "password")).willThrow(
-        new BusinessException(ErrorCode.INVALID_INPUT));
-
     // when, then
     postMember("", "password")
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+
+    // 검증은 메서드 호출 전에 실행된다.
+    then(memberService).shouldHaveNoInteractions();
   }
 
   @Test
@@ -122,76 +117,60 @@ class MemberControllerTest {
   }
 
   @Test
-  @Disabled
-  void updatePassword() throws Exception {
-    // given
-    // 쓸게 없나?
-
+  void editPassword() throws Exception {
     // when, then
-    patchPassword("password", "newPassword", loginSession(1L))
+    patchPassword("old", "new", loginSession(1L))
         .andExpect(status().isNoContent());
 
-    // 리포지토리를 믿고 리포지토리에게 요청 전달했는지만 확인하면 되는거 아닌가? - 네
+    // 서비스를 믿고 리포지토리에게 요청 전달했는지만 확인하면 되는거 아닌가?
+    then(memberService).should().updatePassword(1L, "old", "new");
   }
 
   @Test
-  @Disabled
-  void updatePassword_notLoggedIn() throws Exception {
-    // given
-    // throw 는 어떻게 하지?
-
+  void editPassword_notLoggedIn() throws Exception {
+    // 인터셉터가 throw 한다.
+    // when, then
     patchPassword("password", "newPassword", new MockHttpSession())
-        .andExpect(status().isUnauthorized());
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
 
-    then(memberRepository).shouldHaveNoInteractions();
+    then(memberService).shouldHaveNoInteractions();
   }
 
   @Test
-  @Disabled
-  void updatePassword_invalid() throws Exception {
-    // 마찬가지
-
+  void editPassword_invalid() throws Exception {
     // when, then
     patchPassword("password", "", loginSession(1L))
-        .andExpect(status().isBadRequest());
-    // TODO json 필드로 에러 확인 필요
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
 
-    // 검증은 컨트롤러 메서드 진입 전에 실패하므로 findById 조차 호출되지 않아야 한다.
-    then(memberRepository).shouldHaveNoInteractions();
+    then(memberService).shouldHaveNoInteractions();
   }
 
   @Test
-  @Disabled
-  void updatePassword_wrongCurrentPassword() throws Exception {
-    // 마찬가지
-
+  void editPassword_wrongCurrentPassword() throws Exception {
     // given
-    given(memberRepository.findById(1L)).willReturn(
-        Optional.of(createMember(1L, "loginId", "password")));
+    willThrow(new BusinessException(ErrorCode.PASSWORD_MISMATCH)).given(memberService)
+        .updatePassword(1L, "wrong", "new");
 
     // when, then
-    patchPassword("wrongPassword", "newPassword", loginSession(1L))
+    patchPassword("wrong", "new", loginSession(1L))
         .andExpect(status().isBadRequest())
-        // 검증 실패 400 과 구분: 비밀번호 불일치로 난 400 인지 사유까지 확인한다.
-        // TODO 비밀번호 불일치와 검증실패 구분이 필요하다.
-        .andExpect(jsonPath("$.detail").value("현재 비밀번호가 일치하지 않습니다."));
-
-    // 서비스에서 예외 던지는거임 (인터셉터 아님)
+        .andExpect(jsonPath("$.code").value("PASSWORD_MISMATCH"));
   }
 
   @Test
-  @Disabled
-  void updatePassword_staleSession() throws Exception {
-    // 마찬가지
-
-    // given
-    given(memberRepository.findById(1L)).willReturn(Optional.empty());
+  void editPassword_staleSession() throws Exception {
+    // given: 세션의 memberId(1L)는 있지만 그 회원이 없다 -> 서비스가 UNAUTHORIZED
+    willThrow(new BusinessException(ErrorCode.UNAUTHORIZED)).given(memberService)
+        .updatePassword(1L, "password", "newPassword");
 
     // when, then
     patchPassword("password", "newPassword", loginSession(1L))
-        .andExpect(status().isUnauthorized());
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
 
-    // 에러 나고 업데이트 안된거 확인해야하나? 에러낫으면 요청 안가는거 아닌가? 서비스를 믿어야하는거지 이제.
+    // 업데이트 여부는 서비스가 맡는거다.
   }
 
   // === HELPERS ===
