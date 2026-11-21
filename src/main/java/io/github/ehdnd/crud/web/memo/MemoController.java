@@ -1,13 +1,15 @@
 package io.github.ehdnd.crud.web.memo;
 
+import io.github.ehdnd.crud.domain.memo.Memo;
 import io.github.ehdnd.crud.domain.memo.MemoService;
 import io.github.ehdnd.crud.web.login.Login;
 import io.github.ehdnd.crud.web.memo.dto.MemoResponse;
 import io.github.ehdnd.crud.web.memo.dto.MemoSaveRequest;
 import io.github.ehdnd.crud.web.memo.dto.MemoUpdateRequest;
+import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,8 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/memos")
@@ -38,11 +40,14 @@ public class MemoController {
   }
 
   @PostMapping
-  @ResponseStatus(HttpStatus.CREATED)
-  MemoResponse add(@Login Long memberId, @Validated @RequestBody MemoSaveRequest memoSaveRequest) {
+  ResponseEntity<MemoResponse> add(@Login Long memberId,
+      @Validated @RequestBody MemoSaveRequest memoSaveRequest) {
 
-    return MemoResponse.from(
-        memoService.addMemo(memoSaveRequest.title(), memoSaveRequest.content(), memberId));
+    Memo memo = memoService.addMemo(memoSaveRequest.title(), memoSaveRequest.content(), memberId);
+    URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{memoId}")
+        .buildAndExpand(memo.getId()).toUri();
+
+    return ResponseEntity.created(location).body(MemoResponse.from(memo));
   }
 
 
