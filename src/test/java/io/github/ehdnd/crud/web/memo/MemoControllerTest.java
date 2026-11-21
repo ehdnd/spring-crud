@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -112,6 +113,7 @@ class MemoControllerTest {
     // when, then
     postMemo("title", "content", loginSession(10L))
         .andExpect(status().isCreated())
+        .andExpect(header().string("Location", "http://localhost/memos/1"))
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.title").value("title"))
         .andExpect(jsonPath("$.content").value("content"));

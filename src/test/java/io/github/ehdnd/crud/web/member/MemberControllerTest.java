@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,6 +63,7 @@ class MemberControllerTest {
     // when, then
     postMember("loginId", "password")
         .andExpect(status().isCreated())
+        .andExpect(header().string("Location", "http://localhost/members/1"))
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.loginId").value("loginId"))
         .andExpect(jsonPath("$.password").doesNotExist());
